@@ -39,6 +39,6 @@ Images are stored as `imageUrl` + `imagePublicId` in Firestore. Delivery uses `f
 
 ## Firestore collections
 
-`users`, `categories`, `subcategories`, `services`, `packages`, `offers`, `reviews`, `bookings`, `users/{id}/favorites`
+`users`, `categories`, `services`, `packages`, `offers`, `reviews`, `bookings`, `users/{id}/favorites`
 
 Deploy rules/indexes from `firestore.rules` and `firestore.indexes.json`.

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tamanna/core/responsive/breakpoints.dart';
 import 'package:tamanna/core/theme/app_colors.dart';
-import 'package:tamanna/core/theme/app_text_styles.dart';
 import 'package:tamanna/core/utils/error_handler.dart';
 import 'package:tamanna/core/widgets/cards.dart';
 import 'package:tamanna/core/widgets/media_kit.dart';
@@ -11,6 +10,8 @@ import 'package:tamanna/data/models/review_model.dart';
 import 'package:tamanna/data/models/service_model.dart';
 import 'package:tamanna/data/repositories/review_repository.dart';
 import 'package:tamanna/data/repositories/service_repository.dart';
+import 'package:tamanna/features/request/booking_form.dart';
+import 'package:tamanna/features/request/request_controller.dart';
 import 'package:tamanna/features/shell/site_shell.dart';
 
 class ServiceDetailPage extends StatefulWidget {
@@ -26,6 +27,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
   String? error;
   bool loading = true;
   String gallery = '';
+  bool showBooking = false;
+  final _bookingKey = GlobalKey();
+  final _scroll = ScrollController();
 
   @override
   void initState() {
@@ -59,12 +63,36 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
         related = more[1] as List<ServiceModel>;
         loading = false;
       });
+      final request = Get.find<RequestController>();
+      request.selectService(item);
+      if (request.pendingOpenBooking && mounted) {
+        request.pendingOpenBooking = false;
+        setState(() => showBooking = true);
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBooking());
+      }
     } catch (e) {
       setState(() {
         error = ErrorHandler.message(e);
         loading = false;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _openBooking() {
+    setState(() => showBooking = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBooking());
+  }
+
+  void _scrollToBooking() {
+    final ctx = _bookingKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 350), alignment: 0.08, curve: Curves.easeOut);
   }
 
   @override
@@ -77,59 +105,159 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
     }
     final s = service!;
     final desktop = Breakpoints.isDesktop(context);
+    final isMobile = Breakpoints.isMobile(context);
     final images = [s.imageUrl, ...s.gallery.where((e) => e.isNotEmpty)];
     final galleryCol = Column(
       children: [
-        CloudinaryImage(url: gallery.isEmpty ? s.imageUrl : gallery, height: 420, width: double.infinity),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          children: images
-              .map(
-                (url) => GestureDetector(
-                  onTap: () => setState(() => gallery = url),
-                  child: CloudinaryImage(url: url, width: 72, height: 72),
-                ),
-              )
-              .toList(),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
+          child: CloudinaryImage(
+            url: gallery.isEmpty ? s.imageUrl : gallery,
+            height: isMobile ? 220 : 420,
+            width: double.infinity,
+          ),
         ),
+        if (images.length > 1) ...[
+          SizedBox(height: isMobile ? 8 : 12),
+          SizedBox(
+            height: isMobile ? 48 : 72,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: images.length,
+              separatorBuilder: (_, _) => SizedBox(width: isMobile ? 6 : 8),
+              itemBuilder: (context, i) {
+                final url = images[i];
+                final isSelected = (gallery.isEmpty ? s.imageUrl : gallery) == url;
+                return GestureDetector(
+                  onTap: () => setState(() => gallery = url),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isSelected ? const Color(0xFFE8590C) : AppColors.border,
+                        width: isSelected ? 2 : 1,
+                      ),
+                      borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(isMobile ? 7 : 9),
+                      child: CloudinaryImage(
+                        url: url,
+                        width: isMobile ? 48 : 72,
+                        height: isMobile ? 48 : 72,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ],
     );
     final detailsCol = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(s.name, style: AppTextStyles.h1),
-        const SizedBox(height: 8),
-        RatingWidget(rating: s.rating, count: s.reviewCount),
-        const SizedBox(height: 8),
         Text(
-          s.durationMinutes > 0
-              ? '${s.durationMinutes} minutes · At-home service'
-              : 'At-home service',
-          style: AppTextStyles.small,
+          s.name,
+          style: TextStyle(
+            fontSize: isMobile ? 20 : 28,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+            letterSpacing: -0.3,
+          ),
         ),
-        const SizedBox(height: 16),
-        DiscountBadge(percent: s.discountPercent),
-        const SizedBox(height: 12),
-        PriceWidget(mrp: s.mrp, sellingPrice: s.sellingPrice),
-        const SizedBox(height: 16),
-        Text(s.shortDescription, style: AppTextStyles.body),
-        const SizedBox(height: 20),
+        SizedBox(height: isMobile ? 6 : 8),
+        Row(
+          children: [
+            RatingWidget(rating: s.rating, count: s.reviewCount),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3ECE6),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.timer_outlined, size: 12, color: Color(0xFF6E5E58)),
+                  const SizedBox(width: 3),
+                  Text(
+                    '${s.durationMinutes} min',
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6E5E58)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: isMobile ? 10 : 16),
+        Row(
+          children: [
+            PriceWidget(mrp: s.mrp, sellingPrice: s.sellingPrice),
+            if (s.discountPercent > 0) ...[
+              const SizedBox(width: 8),
+              DiscountBadge(percent: s.discountPercent),
+            ],
+          ],
+        ),
+        SizedBox(height: isMobile ? 10 : 16),
+        Text(
+          s.shortDescription,
+          style: TextStyle(
+            fontSize: isMobile ? 13 : 14,
+            color: AppColors.textSecondary,
+            height: 1.4,
+          ),
+        ),
         if (s.includedItems.isNotEmpty) ...[
-          Text("What's included", style: AppTextStyles.title),
+          SizedBox(height: isMobile ? 12 : 20),
+          Text(
+            "What's included",
+            style: TextStyle(
+              fontSize: isMobile ? 14 : 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: isMobile ? 6 : 8),
           ...s.includedItems.map(
-            (e) => ListTile(
-              dense: true,
-              leading: const Icon(Icons.check, color: AppColors.success),
-              title: Text(e),
+            (e) => Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.check_circle_outline_rounded, size: 15, color: AppColors.success),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      e,
+                      style: TextStyle(fontSize: isMobile ? 12.5 : 13.5, color: AppColors.textPrimary),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
-        const SizedBox(height: 12),
+        SizedBox(height: isMobile ? 12 : 16),
         PrimaryButton(
           label: 'Book Now',
-          onTap: () => Get.toNamed('/booking', parameters: {'service': s.slug}),
+          onTap: _openBooking,
         ),
+        if (showBooking) ...[
+          SizedBox(height: isMobile ? 16 : 28),
+          Container(
+            key: _bookingKey,
+            padding: EdgeInsets.all(isMobile ? 14 : 24),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: const BookingForm(),
+          ),
+        ],
       ],
     );
 
@@ -140,12 +268,22 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
           const TamannaHeader(),
           Expanded(
             child: SingleChildScrollView(
+              controller: _scroll,
               padding: EdgeInsets.only(bottom: desktop ? 0 : 90),
               child: Column(
                 children: [
                   ResponsiveContainer(
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: SiteBackButton(),
+                      ),
+                    ),
+                  ),
+                  ResponsiveContainer(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 28),
+                      padding: EdgeInsets.symmetric(vertical: isMobile ? 16 : 28),
                       child: desktop
                           ? Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,9 +294,10 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                               ],
                             )
                           : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 galleryCol,
-                                const SizedBox(height: 24),
+                                SizedBox(height: isMobile ? 16 : 24),
                                 detailsCol,
                               ],
                             ),
@@ -168,42 +307,70 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('About this service', style: AppTextStyles.h3),
+                        Text(
+                          'About this service',
+                          style: TextStyle(
+                            fontSize: isMobile ? 16 : 20,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                         const SizedBox(height: 8),
-                        Text(s.description, style: AppTextStyles.body),
-                        const SizedBox(height: 24),
+                        Text(s.description, style: TextStyle(fontSize: isMobile ? 13 : 14, color: AppColors.textSecondary, height: 1.4)),
+                        SizedBox(height: isMobile ? 16 : 24),
                         if (s.benefits.isNotEmpty) ...[
-                          Text('Benefits', style: AppTextStyles.h3),
+                          Text(
+                            'Benefits',
+                            style: TextStyle(
+                              fontSize: isMobile ? 16 : 20,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
                           ...s.benefits.map((e) => Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text('• $e', style: AppTextStyles.body),
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text('• $e', style: TextStyle(fontSize: isMobile ? 13 : 14, color: AppColors.textSecondary)),
                               )),
-                          const SizedBox(height: 24),
+                          SizedBox(height: isMobile ? 16 : 24),
                         ],
                         if (s.terms.isNotEmpty) ...[
-                          Text('Good to know', style: AppTextStyles.h3),
+                          Text(
+                            'Good to know',
+                            style: TextStyle(
+                              fontSize: isMobile ? 16 : 20,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
                           ...s.terms.map((e) => Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(e, style: AppTextStyles.body),
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(e, style: TextStyle(fontSize: isMobile ? 13 : 14, color: AppColors.textSecondary)),
                               )),
-                          const SizedBox(height: 24),
+                          SizedBox(height: isMobile ? 16 : 24),
                         ],
-                        Text('Guest reviews', style: AppTextStyles.h3),
-                        const SizedBox(height: 12),
+                        Text(
+                          'Guest reviews',
+                          style: TextStyle(
+                            fontSize: isMobile ? 16 : 20,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         if (reviews.isEmpty)
-                          const Text('No approved reviews yet.')
+                          const Text('No approved reviews yet.', style: TextStyle(fontSize: 13, color: AppColors.textHint))
                         else
                           Wrap(
-                            spacing: 16,
-                            runSpacing: 16,
+                            spacing: isMobile ? 10 : 16,
+                            runSpacing: isMobile ? 10 : 16,
                             children: reviews.map((r) => ReviewCard(review: r)).toList(),
                           ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: isMobile ? 24 : 32),
                         if (related.isNotEmpty) ...[
                           const SectionHeader(title: 'You may also like'),
                           ServiceGrid(services: related),
                         ],
-                        const SizedBox(height: 48),
+                        SizedBox(height: isMobile ? 32 : 48),
                       ],
                     ),
                   ),
@@ -220,9 +387,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
               color: AppColors.surface,
               child: PrimaryButton(
-                label: 'Book This Service',
+                label: 'Book Now',
                 expand: true,
-                onTap: () => Get.toNamed('/booking', parameters: {'service': s.slug}),
+                onTap: _openBooking,
               ),
             ),
     );

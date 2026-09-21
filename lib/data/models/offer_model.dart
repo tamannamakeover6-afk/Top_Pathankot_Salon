@@ -13,13 +13,11 @@ class OfferModel {
   final String bannerUrl;
   final String bannerPublicId;
   final List<String> categoryIds;
-  final List<String> subcategoryIds;
   final List<String> serviceIds;
   final List<String> packageIds;
   final DateTime? startAt;
   final DateTime? endAt;
   final bool active;
-  final bool featured;
   final DateTime? createdAt;
 
   const OfferModel({
@@ -31,13 +29,11 @@ class OfferModel {
     this.bannerUrl = '',
     this.bannerPublicId = '',
     this.categoryIds = const [],
-    this.subcategoryIds = const [],
     this.serviceIds = const [],
     this.packageIds = const [],
     this.startAt,
     this.endAt,
     this.active = true,
-    this.featured = false,
     this.createdAt,
   });
 
@@ -74,13 +70,11 @@ class OfferModel {
       bannerUrl: map['bannerUrl']?.toString() ?? '',
       bannerPublicId: map['bannerPublicId']?.toString() ?? '',
       categoryIds: List<String>.from(map['categoryIds'] ?? const []),
-      subcategoryIds: List<String>.from(map['subcategoryIds'] ?? const []),
       serviceIds: List<String>.from(map['serviceIds'] ?? const []),
       packageIds: List<String>.from(map['packageIds'] ?? const []),
       startAt: DateParser.parse(map['startAt']),
       endAt: DateParser.parse(map['endAt']),
       active: map['active'] != false,
-      featured: map['featured'] == true,
       createdAt: DateParser.parse(map['createdAt']),
     );
   }
@@ -93,13 +87,11 @@ class OfferModel {
         'bannerUrl': bannerUrl,
         'bannerPublicId': bannerPublicId,
         'categoryIds': categoryIds,
-        'subcategoryIds': subcategoryIds,
         'serviceIds': serviceIds,
         'packageIds': packageIds,
         'startAt': startAt != null ? Timestamp.fromDate(startAt!) : null,
         'endAt': endAt != null ? Timestamp.fromDate(endAt!) : null,
         'active': active,
-        'featured': featured,
         'createdAt': createdAt != null
             ? Timestamp.fromDate(createdAt!)
             : FieldValue.serverTimestamp(),

@@ -5,9 +5,8 @@ import 'package:tamanna/data/models/package_model.dart';
 class PackageRepository {
   final _col = FirebaseFirestore.instance.collection(Collections.packages);
 
-  Future<List<PackageModel>> fetchActive({bool featuredOnly = false, int limit = 12}) async {
+  Future<List<PackageModel>> fetchActive({int limit = 12}) async {
     Query<Map<String, dynamic>> q = _col.where('active', isEqualTo: true);
-    if (featuredOnly) q = q.where('featured', isEqualTo: true);
     final snap = await q.limit(limit).get();
     return snap.docs.map(PackageModel.fromDoc).toList();
   }
@@ -38,7 +37,7 @@ class PackageRepository {
   }
 
   Future<void> setActive(String id, bool active) =>
-      _col.doc(id).update({'active': active, 'updatedAt': FieldValue.serverTimestamp()});
+      _col.doc(id).set({'active': active, 'updatedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
 
   Future<void> delete(String id) => _col.doc(id).delete();
 

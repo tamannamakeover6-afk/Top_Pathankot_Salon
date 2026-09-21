@@ -23,6 +23,6 @@ class Breakpoints {
     if (w >= 1200) return max < 4 ? max : 4;
     if (w >= 900) return max < 3 ? max : 3;
     if (w >= 600) return 2;
-    return 1;
+    return 2; // 2-column compact grid on mobile
   }
 }

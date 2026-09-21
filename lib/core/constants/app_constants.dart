@@ -30,7 +30,6 @@ class AppConstants {
 class Collections {
   static const users = 'users';
   static const categories = 'categories';
-  static const subcategories = 'subcategories';
   static const services = 'services';
   static const packages = 'packages';
   static const offers = 'offers';

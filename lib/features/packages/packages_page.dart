@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tamanna/core/theme/app_text_styles.dart';
+import 'package:tamanna/core/responsive/breakpoints.dart';
 import 'package:tamanna/core/utils/error_handler.dart';
 import 'package:tamanna/core/widgets/cards.dart';
 import 'package:tamanna/core/widgets/media_kit.dart';
@@ -9,7 +9,10 @@ import 'package:tamanna/data/models/package_model.dart';
 import 'package:tamanna/data/models/service_model.dart';
 import 'package:tamanna/data/repositories/package_repository.dart';
 import 'package:tamanna/data/repositories/service_repository.dart';
+import 'package:tamanna/core/theme/app_colors.dart';
 import 'package:tamanna/features/catalog/catalog_controller.dart';
+import 'package:tamanna/features/request/booking_form.dart';
+import 'package:tamanna/features/request/request_controller.dart';
 import 'package:tamanna/features/shell/site_shell.dart';
 
 class PackagesPage extends StatefulWidget {
@@ -39,19 +42,27 @@ class _PackagesPageState extends State<PackagesPage> {
               if (packs.isEmpty) {
                 return const EmptyState(title: 'No packages yet', message: 'Admin can publish beauty packages from the dashboard.');
               }
+              final isMobile = Breakpoints.isMobile(context);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Packages', style: AppTextStyles.h1),
-                  const SizedBox(height: 8),
-                  Text('Thoughtful combinations, priced as a complete ritual.', style: AppTextStyles.body),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: packs.map((p) => PackageCard(pack: p)).toList(),
+                  Text(
+                    'Packages',
+                    style: TextStyle(
+                      fontSize: isMobile ? 22 : 32,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 6),
+                  Text('Thoughtful combinations, priced as a complete ritual.', style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary)),
+                  SizedBox(height: isMobile ? 16 : 24),
+                  Wrap(
+                    spacing: isMobile ? 12 : 16,
+                    runSpacing: isMobile ? 12 : 16,
+                    children: packs.map((p) => PackageCard(pack: p, width: isMobile ? double.infinity : 320)).toList(),
+                  ),
+                  SizedBox(height: isMobile ? 24 : 40),
                 ],
               );
             },
@@ -73,11 +84,24 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
   List<ServiceModel> included = [];
   String? error;
   bool loading = true;
+  bool showBooking = false;
+  final _bookingKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  void _openBooking() {
+    setState(() => showBooking = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBooking());
+  }
+
+  void _scrollToBooking() {
+    final ctx = _bookingKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 350), alignment: 0.08, curve: Curves.easeOut);
   }
 
   Future<void> _load() async {
@@ -96,6 +120,13 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
         included = services;
         loading = false;
       });
+      final request = Get.find<RequestController>();
+      request.selectPackage(item);
+      if (request.pendingOpenBooking && mounted) {
+        request.pendingOpenBooking = false;
+        setState(() => showBooking = true);
+        WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBooking());
+      }
     } catch (e) {
       setState(() {
         error = ErrorHandler.message(e);
@@ -111,33 +142,79 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
       return SiteShell(child: ErrorState(message: error ?? 'Not found', onRetry: _load));
     }
     final p = pack!;
+    final isMobile = Breakpoints.isMobile(context);
     return SiteShell(
       child: Column(
         children: [
-          CloudinaryImage(url: p.imageUrl, height: 320, width: double.infinity, radius: BorderRadius.zero),
+          CloudinaryImage(
+            url: p.imageUrl,
+            height: isMobile ? 190 : 320,
+            width: double.infinity,
+            radius: BorderRadius.zero,
+          ),
           ResponsiveContainer(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
+              padding: EdgeInsets.symmetric(vertical: isMobile ? 16 : 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(p.name, style: AppTextStyles.h1),
-                  const SizedBox(height: 8),
-                  Text(p.description, style: AppTextStyles.body),
-                  const SizedBox(height: 16),
-                  PriceWidget(mrp: p.mrp, sellingPrice: p.sellingPrice),
-                  Text('Save ₹${(p.mrp - p.sellingPrice).round()} · ${p.durationMinutes} min',
-                      style: AppTextStyles.small),
-                  const SizedBox(height: 20),
-                  PrimaryButton(
-                    label: 'Book this package',
-                    onTap: () => Get.toNamed('/booking', parameters: {'package': p.slug}),
+                  Text(
+                    p.name,
+                    style: TextStyle(
+                      fontSize: isMobile ? 20 : 28,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.3,
+                    ),
                   ),
-                  const SizedBox(height: 32),
-                  Text('Included services', style: AppTextStyles.h3),
-                  const SizedBox(height: 12),
+                  SizedBox(height: isMobile ? 6 : 8),
+                  Text(
+                    p.description,
+                    style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary, height: 1.4),
+                  ),
+                  SizedBox(height: isMobile ? 10 : 16),
+                  Row(
+                    children: [
+                      PriceWidget(mrp: p.mrp, sellingPrice: p.sellingPrice),
+                      const SizedBox(width: 8),
+                      DiscountBadge(percent: p.discountPercent),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Save ₹${(p.mrp - p.sellingPrice).round()} · ${p.durationMinutes} min',
+                    style: TextStyle(fontSize: isMobile ? 11.5 : 13, color: AppColors.textHint),
+                  ),
+                  SizedBox(height: isMobile ? 14 : 20),
+                  PrimaryButton(
+                    label: 'Book Now',
+                    onTap: _openBooking,
+                  ),
+                  if (showBooking) ...[
+                    SizedBox(height: isMobile ? 16 : 28),
+                    Container(
+                      key: _bookingKey,
+                      padding: EdgeInsets.all(isMobile ? 14 : 24),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const BookingForm(),
+                    ),
+                  ],
+                  SizedBox(height: isMobile ? 24 : 32),
+                  Text(
+                    'Included services',
+                    style: TextStyle(
+                      fontSize: isMobile ? 16 : 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: isMobile ? 8 : 12),
                   ServiceGrid(services: included),
-                  const SizedBox(height: 40),
+                  SizedBox(height: isMobile ? 24 : 40),
                 ],
               ),
             ),

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tamanna/core/responsive/breakpoints.dart';
 import 'package:tamanna/core/theme/app_colors.dart';
-import 'package:tamanna/core/theme/app_radius.dart';
 import 'package:tamanna/core/theme/app_shadows.dart';
 import 'package:tamanna/core/theme/app_text_styles.dart';
 import 'package:tamanna/core/widgets/media_kit.dart';
@@ -14,8 +13,7 @@ import 'package:tamanna/data/models/package_model.dart';
 import 'package:tamanna/data/models/review_model.dart';
 import 'package:tamanna/data/models/service_model.dart';
 import 'package:tamanna/data/services/cloudinary_service.dart';
-import 'package:tamanna/features/auth/auth_controller.dart';
-import 'package:tamanna/features/favorites/favorites_controller.dart';
+import 'package:tamanna/features/request/request_controller.dart';
 
 class CategoryCard extends StatefulWidget {
   final CategoryModel category;
@@ -30,6 +28,9 @@ class _CategoryCardState extends State<CategoryCard> {
   @override
   Widget build(BuildContext context) {
     final c = widget.category;
+    final isMobile = Breakpoints.isMobile(context);
+    final imgHeight = isMobile ? 115.0 : 160.0;
+    final radius = isMobile ? 12.0 : 18.0;
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
       onExit: (_) => setState(() => hover = false),
@@ -44,31 +45,37 @@ class _CategoryCardState extends State<CategoryCard> {
               transform: Matrix4.translationValues(0, hover ? -4 : 0, 0),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(radius),
                 boxShadow: hover ? AppShadows.hover : AppShadows.soft,
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(radius),
                 child: CloudinaryImage(
                   url: c.imageUrl,
-                  height: 160,
+                  height: imgHeight,
                   width: double.infinity,
-                  radius: BorderRadius.circular(18),
+                  radius: BorderRadius.circular(radius),
                 ),
               ),
             ),
             // Details outside the box
-            const SizedBox(height: 10),
+            SizedBox(height: isMobile ? 6 : 10),
             Text(
               c.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.title.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
+              style: AppTextStyles.title.copyWith(
+                fontSize: isMobile ? 13 : 15,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             Text(
               c.serviceCount > 0 ? '${c.serviceCount} services' : 'Explore',
-              style: AppTextStyles.small.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.small.copyWith(
+                fontSize: isMobile ? 11 : 12,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -212,7 +219,9 @@ class _ServiceCardState extends State<ServiceCard> {
                         label: 'Book Now',
                         onTap: () {
                           Navigator.of(context).pop();
-                          Get.toNamed('/booking', parameters: {'service': s.slug});
+                          final request = Get.find<RequestController>();
+                          request.pendingOpenBooking = true;
+                          Get.toNamed('/services/${s.slug}');
                         },
                       ),
                     ),
@@ -229,7 +238,9 @@ class _ServiceCardState extends State<ServiceCard> {
   @override
   Widget build(BuildContext context) {
     final s = widget.service;
-    final fav = Get.find<FavoritesController>();
+    final isMobile = Breakpoints.isMobile(context);
+    final imgHeight = isMobile ? 120.0 : 190.0;
+    final radius = isMobile ? 12.0 : 18.0;
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
       onExit: (_) => setState(() => hover = false),
@@ -242,7 +253,7 @@ class _ServiceCardState extends State<ServiceCard> {
             transform: Matrix4.translationValues(0, hover ? -4 : 0, 0),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(radius),
               boxShadow: hover ? AppShadows.hover : AppShadows.soft,
             ),
             child: Stack(
@@ -250,15 +261,15 @@ class _ServiceCardState extends State<ServiceCard> {
                 GestureDetector(
                   onTap: () => Get.toNamed('/services/${s.slug}'),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(radius),
                     child: AnimatedScale(
                       scale: hover ? 1.03 : 1.0,
                       duration: const Duration(milliseconds: 260),
                       child: CloudinaryImage(
                         url: s.imageUrl,
-                        height: 190,
+                        height: imgHeight,
                         width: double.infinity,
-                        radius: BorderRadius.circular(18),
+                        radius: BorderRadius.circular(radius),
                         preset: CloudinaryPreset.card,
                       ),
                     ),
@@ -266,8 +277,8 @@ class _ServiceCardState extends State<ServiceCard> {
                 ),
                 // Top-Left Quick Preview Eye Icon (Orange/Accent circular badge)
                 Positioned(
-                  top: 10,
-                  left: 10,
+                  top: isMobile ? 6 : 10,
+                  left: isMobile ? 6 : 10,
                   child: Material(
                     color: const Color(0xFFE8590C), // Vibrant beauty accent orange
                     shape: const CircleBorder(),
@@ -275,42 +286,17 @@ class _ServiceCardState extends State<ServiceCard> {
                     child: InkWell(
                       customBorder: const CircleBorder(),
                       onTap: () => _openQuickPreview(context, s),
-                      child: const Padding(
-                        padding: EdgeInsets.all(7),
-                        child: Icon(Icons.remove_red_eye_outlined, size: 16, color: Colors.white),
+                      child: Padding(
+                        padding: EdgeInsets.all(isMobile ? 5 : 7),
+                        child: Icon(Icons.remove_red_eye_outlined, size: isMobile ? 13 : 16, color: Colors.white),
                       ),
                     ),
                   ),
                 ),
-                // Top-Right Favorite/Wishlist Heart Icon
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Obx(() {
-                    final on = fav.isFavorite(s.id);
-                    return Material(
-                      color: Colors.white,
-                      shape: const CircleBorder(),
-                      elevation: 2,
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () => fav.toggle(s.id),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: Icon(
-                            on ? Icons.favorite : Icons.favorite_border,
-                            color: const Color(0xFFE8590C),
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
                 if (s.discountPercent > 0)
                   Positioned(
-                    bottom: 10,
-                    left: 10,
+                    bottom: isMobile ? 6 : 10,
+                    left: isMobile ? 6 : 10,
                     child: DiscountBadge(percent: s.discountPercent),
                   ),
               ],
@@ -318,7 +304,7 @@ class _ServiceCardState extends State<ServiceCard> {
           ),
 
           // 2. Details OUTSIDE the box, sitting directly on the page surface
-          const SizedBox(height: 10),
+          SizedBox(height: isMobile ? 6 : 10),
           GestureDetector(
             onTap: () => Get.toNamed('/services/${s.slug}'),
             child: Text(
@@ -326,72 +312,51 @@ class _ServiceCardState extends State<ServiceCard> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.title.copyWith(
-                fontSize: 15,
+                fontSize: isMobile ? 12.5 : 15,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
-                height: 1.25,
+                height: 1.2,
               ),
             ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          SizedBox(height: isMobile ? 3 : 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              RichText(
+                text: TextSpan(
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '₹${s.sellingPrice.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
-                          ),
-                          if (s.durationMinutes > 0)
-                            TextSpan(
-                              text: '  / ${s.durationMinutes}min',
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 13,
-                              ),
-                            ),
-                        ],
+                    TextSpan(
+                      text: '₹${s.sellingPrice.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: isMobile ? 13 : 15,
                       ),
                     ),
-                    if (s.mrp > s.sellingPrice) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        '₹${s.mrp.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          color: AppColors.textHint,
-                          fontSize: 12,
-                          decoration: TextDecoration.lineThrough,
+                    if (s.durationMinutes > 0)
+                      TextSpan(
+                        text: ' · ${s.durationMinutes}m',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w400,
+                          fontSize: isMobile ? 10.5 : 13,
                         ),
                       ),
-                    ],
                   ],
                 ),
               ),
-              // Circular Orange/Accent "+" Quick Add / Book Button
-              Material(
-                color: const Color(0xFFE8590C),
-                shape: const CircleBorder(),
-                elevation: 1,
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => Get.toNamed('/booking', parameters: {'service': s.slug}),
-                  child: const Padding(
-                    padding: EdgeInsets.all(7),
-                    child: Icon(Icons.add, color: Colors.white, size: 18),
+              if (s.mrp > s.sellingPrice) ...[
+                const SizedBox(height: 1),
+                Text(
+                  '₹${s.mrp.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: AppColors.textHint,
+                    fontSize: isMobile ? 10.5 : 12,
+                    decoration: TextDecoration.lineThrough,
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ],
@@ -402,43 +367,47 @@ class _ServiceCardState extends State<ServiceCard> {
 
 class PackageCard extends StatelessWidget {
   final PackageModel pack;
-  const PackageCard({super.key, required this.pack});
+  final double? width;
+  const PackageCard({super.key, required this.pack, this.width});
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
+    final cardWidth = width ?? (isMobile ? 260.0 : 320.0);
     return GestureDetector(
       onTap: () => Get.toNamed('/packages/${pack.slug}'),
       child: Container(
-        width: 320,
+        width: cardWidth,
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: AppRadius.card,
+          borderRadius: BorderRadius.circular(isMobile ? 14 : 18),
           boxShadow: AppShadows.soft,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CloudinaryImage(url: pack.imageUrl, height: 170, width: double.infinity, preset: CloudinaryPreset.banner),
+            CloudinaryImage(
+              url: pack.imageUrl,
+              height: isMobile ? 135 : 170,
+              width: double.infinity,
+              radius: BorderRadius.vertical(top: Radius.circular(isMobile ? 14 : 18)),
+              preset: CloudinaryPreset.banner,
+            ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isMobile ? 12 : 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   DiscountBadge(percent: pack.discountPercent),
-                  const SizedBox(height: 8),
-                  Text(pack.name, style: AppTextStyles.title),
-                  const SizedBox(height: 6),
+                  SizedBox(height: isMobile ? 6 : 8),
+                  Text(pack.name, style: AppTextStyles.title.copyWith(fontSize: isMobile ? 14 : 16)),
+                  const SizedBox(height: 4),
                   Text(
                     '${pack.serviceIds.length} services · ${pack.durationMinutes} min',
-                    style: AppTextStyles.small,
+                    style: AppTextStyles.small.copyWith(fontSize: isMobile ? 11 : 12),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: isMobile ? 6 : 10),
                   PriceWidget(mrp: pack.mrp, sellingPrice: pack.sellingPrice),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Save ₹${(pack.mrp - pack.sellingPrice).round()}',
-                    style: AppTextStyles.caption.copyWith(color: AppColors.success),
-                  ),
                 ],
               ),
             ),
@@ -455,34 +424,47 @@ class OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     return Container(
-      width: 360,
-      decoration: BoxDecoration(color: AppColors.ink, borderRadius: AppRadius.card),
+      width: isMobile ? 270 : 360,
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(isMobile ? 14 : 18),
+      ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CloudinaryImage(
             url: offer.bannerUrl,
-            height: 150,
+            height: isMobile ? 120 : 150,
             width: double.infinity,
             radius: BorderRadius.zero,
             preset: CloudinaryPreset.banner,
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isMobile ? 12 : 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(offer.title, style: AppTextStyles.title.copyWith(color: Colors.white)),
-                const SizedBox(height: 6),
+                Text(
+                  offer.title,
+                  style: AppTextStyles.title.copyWith(
+                    color: Colors.white,
+                    fontSize: isMobile ? 13.5 : 15,
+                  ),
+                ),
+                const SizedBox(height: 4),
                 Text(
                   offer.discountType == 'fixed'
                       ? '₹${offer.discountValue.round()} off'
                       : '${offer.discountValue.round()}% off selected rituals',
-                  style: AppTextStyles.small.copyWith(color: const Color(0xFFE8D5C8)),
+                  style: AppTextStyles.small.copyWith(
+                    color: const Color(0xFFE8D5C8),
+                    fontSize: isMobile ? 11 : 12,
+                  ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: isMobile ? 8 : 12),
                 SecondaryButton(
                   label: 'Browse',
                   onTap: () => Get.toNamed('/offers'),
@@ -502,12 +484,13 @@ class ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     return Container(
-      width: 320,
-      padding: const EdgeInsets.all(20),
+      width: isMobile ? 260 : 320,
+      padding: EdgeInsets.all(isMobile ? 14 : 20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: AppRadius.card,
+        borderRadius: BorderRadius.circular(isMobile ? 14 : 18),
         boxShadow: AppShadows.soft,
       ),
       child: Column(
@@ -516,22 +499,29 @@ class ReviewCard extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
+                radius: isMobile ? 16 : 20,
                 backgroundColor: AppColors.cream,
-                child: Text(review.userName.isEmpty ? 'T' : review.userName[0]),
+                child: Text(
+                  review.userName.isEmpty ? 'T' : review.userName[0],
+                  style: TextStyle(fontSize: isMobile ? 12 : 14),
+                ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(review.userName, style: AppTextStyles.title.copyWith(fontSize: 15)),
+                    Text(
+                      review.userName,
+                      style: AppTextStyles.title.copyWith(fontSize: isMobile ? 13 : 15),
+                    ),
                     RatingWidget(rating: review.rating.toDouble()),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: isMobile ? 8 : 12),
           Text(review.review, maxLines: 4, overflow: TextOverflow.ellipsis, style: AppTextStyles.body),
           const SizedBox(height: 10),
           Text(review.itemName, style: AppTextStyles.caption),
@@ -547,6 +537,7 @@ class ServiceGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     final count = Breakpoints.gridCount(context);
     return GridView.builder(
       shrinkWrap: true,
@@ -554,9 +545,9 @@ class ServiceGrid extends StatelessWidget {
       itemCount: services.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: count,
-        mainAxisSpacing: 24,
-        crossAxisSpacing: 20,
-        mainAxisExtent: 285,
+        mainAxisSpacing: isMobile ? 16 : 24,
+        crossAxisSpacing: isMobile ? 12 : 20,
+        mainAxisExtent: isMobile ? 218 : 285,
       ),
       itemBuilder: (_, i) => ServiceCard(service: services[i]),
     );
@@ -568,43 +559,35 @@ class SkeletonServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(isMobile ? 12 : 18),
           child: Shimmer.fromColors(
             baseColor: AppColors.cream,
             highlightColor: AppColors.surface,
             child: Container(
-              height: 190,
+              height: isMobile ? 120 : 190,
               width: double.infinity,
               color: AppColors.cream,
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: isMobile ? 6 : 10),
         Shimmer.fromColors(
           baseColor: AppColors.cream,
           highlightColor: AppColors.surface,
-          child: Container(height: 14, width: 140, color: AppColors.cream),
+          child: Container(height: isMobile ? 12 : 14, width: 140, color: AppColors.cream),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: isMobile ? 4 : 6),
         Shimmer.fromColors(
           baseColor: AppColors.cream,
           highlightColor: AppColors.surface,
-          child: Container(height: 12, width: 90, color: AppColors.cream),
+          child: Container(height: isMobile ? 10 : 12, width: 90, color: AppColors.cream),
         ),
       ],
     );
-  }
-}
-
-class AuthGateNote {
-  static void requireLogin() {
-    final auth = Get.find<AuthController>();
-    if (!auth.isLoggedIn) {
-      Get.toNamed('/login');
-    }
   }
 }

@@ -49,19 +49,19 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 64),
                   SectionHeader(
                     eyebrow: 'Popular',
-                    title: 'Featured services',
+                    title: 'Services to book',
                     action: 'View all',
                     onAction: () => Get.toNamed('/categories'),
                   ),
                   if (catalog.loadingHome.value)
                     const SizedBox(height: 280, child: SkeletonServiceCard())
-                  else if (catalog.featuredServices.isEmpty)
+                  else if (catalog.homeServices.isEmpty)
                     EmptyState(
                       title: 'Catalog coming soon',
                       message: 'Services will appear here once the admin publishes them.',
                     )
                   else
-                    ServiceGrid(services: catalog.featuredServices),
+                    ServiceGrid(services: catalog.homeServices),
                   if (catalog.offers.isNotEmpty) ...[
                     const SizedBox(height: 64),
                     SectionHeader(
@@ -162,7 +162,7 @@ class _Hero extends StatelessWidget {
             runSpacing: 12,
             children: [
               PrimaryButton(label: 'Explore Services', onTap: () => Get.toNamed('/categories')),
-              SecondaryButton(label: 'Book Now', onTap: () => Get.toNamed('/categories')),
+              SecondaryButton(label: 'Request now', onTap: () => Get.toNamed('/categories')),
             ],
           ),
         ],
@@ -193,6 +193,7 @@ class _CategoryRow extends StatelessWidget {
     if (cats.isEmpty) {
       return const EmptyState(title: 'No categories yet', message: 'Ask an admin to publish the catalog.');
     }
+    final isMobile = Breakpoints.isMobile(context);
     final count = Breakpoints.gridCount(context, max: 5);
     return GridView.builder(
       shrinkWrap: true,
@@ -200,9 +201,9 @@ class _CategoryRow extends StatelessWidget {
       itemCount: cats.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: count,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
-        mainAxisExtent: 225,
+        mainAxisSpacing: isMobile ? 14 : 20,
+        crossAxisSpacing: isMobile ? 12 : 20,
+        mainAxisExtent: isMobile ? 175 : 225,
       ),
       itemBuilder: (_, i) => CategoryCard(category: cats[i]),
     );
@@ -238,7 +239,7 @@ class _Why extends StatelessWidget {
       (Icons.home_outlined, 'At-home service', 'No travel. No waiting rooms.'),
       (Icons.verified_outlined, 'Verified professionals', 'Trained specialists you can trust.'),
       (Icons.payments_outlined, 'Transparent pricing', 'MRP, offer price and duration, clearly shown.'),
-      (Icons.event_available_outlined, 'Easy booking', 'Pick a date, time and address in minutes.'),
+      (Icons.chat_outlined, 'WhatsApp request', 'Send selected services, date and time in one message.'),
       (Icons.spa_outlined, 'Premium products', 'Thoughtful formulas for skin and hair.'),
       (Icons.schedule_outlined, 'Convenient hours', 'Slots that fit around your day.'),
     ];
@@ -296,7 +297,7 @@ class _Cta extends StatelessWidget {
               style: AppTextStyles.h2.copyWith(color: Colors.white), textAlign: TextAlign.center),
           const SizedBox(height: 16),
           PrimaryButton(
-            label: 'Book a Service',
+            label: 'Request a Service',
             onTap: () => Get.toNamed('/categories'),
           ),
         ],

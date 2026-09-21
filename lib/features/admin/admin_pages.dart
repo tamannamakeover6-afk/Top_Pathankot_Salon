@@ -15,13 +15,11 @@ import 'package:tamanna/data/models/category_model.dart';
 import 'package:tamanna/data/models/offer_model.dart';
 import 'package:tamanna/data/models/package_model.dart';
 import 'package:tamanna/data/models/service_model.dart';
-import 'package:tamanna/data/models/subcategory_model.dart';
 import 'package:tamanna/data/repositories/category_repository.dart';
 import 'package:tamanna/data/repositories/offer_repository.dart';
 import 'package:tamanna/data/repositories/package_repository.dart';
 import 'package:tamanna/data/repositories/review_repository.dart';
 import 'package:tamanna/data/repositories/service_repository.dart';
-import 'package:tamanna/data/repositories/subcategory_repository.dart';
 import 'package:tamanna/features/admin/admin_shell.dart';
 
 class AdminDashboardPage extends StatelessWidget {
@@ -123,27 +121,19 @@ class AdminCategoriesPage extends StatelessWidget {
             createLabel: 'New category',
             onCreate: () => _categoryForm(context, repo),
             emptyTitle: 'No categories',
-            emptyMessage: 'Create a category, then add its subcategories and services.',
+            emptyMessage: 'Create a category, then open it to add services.',
             children: items
                 .map(
                   (c) => ListTile(
                     onTap: () => Get.toNamed(AppRoutes.adminCategory(c.id)),
                     leading: CloudinaryImage(url: c.imageUrl, width: 48, height: 48),
                     title: Text(c.name),
-                    subtitle: Text('${c.active ? 'Active' : 'Hidden'} · tap to open subcategories'),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(icon: const Icon(Icons.edit), onPressed: () => _categoryForm(context, repo, existing: c)),
-                        IconButton(
-                          icon: Icon(c.active ? Icons.visibility_off : Icons.visibility),
-                          onPressed: () => repo.setActive(c.id, !c.active),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _confirmDelete(context, () => repo.delete(c.id)),
-                        ),
-                        const Icon(Icons.chevron_right),
-                      ],
+                    subtitle: Text('${c.active ? 'Active' : 'Inactive'} · tap to open services'),
+                    trailing: _AdminActions(
+                      active: c.active,
+                      onActiveChanged: (v) => _setActive(() => repo.setActive(c.id, v)),
+                      onEdit: () => _categoryForm(context, repo, existing: c),
+                      onDelete: () => _confirmDelete(context, () => repo.delete(c.id)),
                     ),
                   ),
                 )
@@ -155,128 +145,44 @@ class AdminCategoriesPage extends StatelessWidget {
   }
 }
 
-class AdminCategorySubsPage extends StatelessWidget {
-  const AdminCategorySubsPage({super.key});
+class AdminCategoryServicesPage extends StatelessWidget {
+  const AdminCategoryServicesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final categoryId = Get.parameters['categoryId'] ?? '';
-    final catRepo = CategoryRepository();
-    final subRepo = SubcategoryRepository();
+    final serviceRepo = ServiceRepository();
     return FutureBuilder(
-      future: catRepo.byId(categoryId),
+      future: CategoryRepository().byId(categoryId),
       builder: (context, catSnap) {
         final cat = catSnap.data;
         return AdminShell(
-          title: cat?.name ?? 'Subcategories',
+          title: cat?.name ?? 'Services',
           onBack: () => Get.offNamed(AppRoutes.adminCategories),
           child: StreamBuilder(
-            stream: subRepo.watchAllByCategory(categoryId),
+            stream: serviceRepo.watchByCategory(categoryId),
             builder: (context, snap) {
               final items = snap.data ?? [];
-              return _AdminList(
-                createLabel: 'New subcategory',
-                onCreate: () => _subForm(context, subRepo, catRepo, lockedCategoryId: categoryId),
-                emptyTitle: 'No subcategories in this category',
-                emptyMessage: 'Add a subcategory, then open it to attach services.',
-                children: items
-                    .map(
-                      (s) => ListTile(
-                        onTap: () => Get.toNamed(AppRoutes.adminSubcategory(categoryId, s.id)),
-                        leading: CloudinaryImage(url: s.imageUrl, width: 48, height: 48),
-                        title: Text(s.name),
-                        subtitle: Text('${s.active ? 'Active' : 'Hidden'} · tap to open services'),
-                        trailing: Wrap(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _subForm(
-                                context,
-                                subRepo,
-                                catRepo,
-                                existing: s,
-                                lockedCategoryId: categoryId,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed: () => _confirmDelete(context, () => subRepo.delete(s.id)),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-}
-
-class AdminSubcategoryServicesPage extends StatelessWidget {
-  const AdminSubcategoryServicesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final categoryId = Get.parameters['categoryId'] ?? '';
-    final subcategoryId = Get.parameters['subcategoryId'] ?? '';
-    final serviceRepo = ServiceRepository();
-    return FutureBuilder(
-      future: () async {
-        final cat = await CategoryRepository().byId(categoryId);
-        final sub = await SubcategoryRepository().byId(subcategoryId);
-        return (cat, sub);
-      }(),
-      builder: (context, snap) {
-        final cat = snap.data?.$1;
-        final sub = snap.data?.$2;
-        final title = [cat?.name, sub?.name].whereType<String>().where((e) => e.isNotEmpty).join(' · ');
-        return AdminShell(
-          title: title.isEmpty ? 'Services' : title,
-          onBack: () => Get.offNamed(AppRoutes.adminCategory(categoryId)),
-          child: StreamBuilder(
-            stream: serviceRepo.watchBySubcategory(subcategoryId),
-            builder: (context, svcSnap) {
-              final items = svcSnap.data ?? [];
               return _AdminList(
                 createLabel: 'New service',
-                onCreate: () => _serviceForm(
-                  context,
-                  lockedCategoryId: categoryId,
-                  lockedSubcategoryId: subcategoryId,
-                ),
-                emptyTitle: 'No services in this subcategory',
-                emptyMessage: 'Create a service here so it stays linked to this category and subcategory.',
+                onCreate: () => _serviceForm(context, lockedCategoryId: categoryId),
+                emptyTitle: 'No services in this category',
+                emptyMessage: 'Add services here. They belong directly to this category.',
                 children: items
                     .map(
                       (s) => ListTile(
                         leading: CloudinaryImage(url: s.imageUrl, width: 48, height: 48),
                         title: Text(s.name),
-                        subtitle: Text('${PriceUtils.format(s.sellingPrice)} · ${s.active ? 'Active' : 'Hidden'}'),
-                        trailing: Wrap(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _serviceForm(
-                                context,
-                                existing: s,
-                                lockedCategoryId: categoryId,
-                                lockedSubcategoryId: subcategoryId,
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(s.active ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => serviceRepo.setActive(s.id, !s.active),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed: () => _confirmDelete(context, () => serviceRepo.delete(s.id)),
-                            ),
-                          ],
+                        subtitle: Text('${PriceUtils.format(s.sellingPrice)} · ${s.active ? 'Active' : 'Inactive'}'),
+                        trailing: _AdminActions(
+                          active: s.active,
+                          onActiveChanged: (v) => _setActive(() => serviceRepo.setActive(s.id, v)),
+                          onEdit: () => _serviceForm(
+                            context,
+                            existing: s,
+                            lockedCategoryId: categoryId,
+                          ),
+                          onDelete: () => _confirmDelete(context, () => serviceRepo.delete(s.id)),
                         ),
                       ),
                     )
@@ -286,59 +192,6 @@ class AdminSubcategoryServicesPage extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class AdminSubcategoriesPage extends StatelessWidget {
-  const AdminSubcategoriesPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    final repo = SubcategoryRepository();
-    final cats = CategoryRepository();
-    return AdminShell(
-      title: 'Subcategories',
-      child: StreamBuilder(
-        stream: cats.watchAll(),
-        builder: (context, catSnap) {
-          return StreamBuilder(
-            stream: repo.watchAll(),
-            builder: (context, snap) {
-              final items = snap.data ?? [];
-              final catList = catSnap.data ?? [];
-              final names = {for (final c in catList) c.id: c.name};
-              return _AdminList(
-                createLabel: 'New subcategory',
-                onCreate: () => _subForm(context, repo, cats),
-                emptyTitle: 'No subcategories',
-                emptyMessage: 'Create a subcategory under a category, then add services inside it.',
-                children: items
-                    .map(
-                      (s) => ListTile(
-                        onTap: () => Get.toNamed(AppRoutes.adminSubcategory(s.categoryId, s.id)),
-                        title: Text(s.name),
-                        subtitle: Text('${names[s.categoryId] ?? 'Unlinked category'} · ${s.active ? 'Active' : 'Hidden'}'),
-                        trailing: Wrap(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _subForm(context, repo, cats, existing: s),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed: () => _confirmDelete(context, () => repo.delete(s.id)),
-                            ),
-                            const Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
-              );
-            },
-          );
-        },
-      ),
     );
   }
 }
@@ -354,56 +207,33 @@ class AdminServicesPage extends StatelessWidget {
         stream: CategoryRepository().watchAll(),
         builder: (context, catSnap) {
           return StreamBuilder(
-            stream: SubcategoryRepository().watchAll(),
-            builder: (context, subSnap) {
-              return StreamBuilder(
-                stream: repo.watchAll(),
-                builder: (context, snap) {
-                  final items = snap.data ?? [];
-                  final cats = {for (final c in catSnap.data ?? <CategoryModel>[]) c.id: c.name};
-                  final subs = {for (final s in subSnap.data ?? <SubcategoryModel>[]) s.id: s.name};
-                  return _AdminList(
-                    createLabel: 'New service',
-                    onCreate: () => _serviceForm(context),
-                    emptyTitle: 'No services',
-                    emptyMessage: 'Open a category, then a subcategory, and add services there.',
-                    children: items
-                        .map(
-                          (s) {
-                            final path = [
-                              cats[s.categoryId] ?? 'No category',
-                              if (s.subcategoryId.isNotEmpty) subs[s.subcategoryId] ?? 'Unknown subcategory',
-                            ].join(' · ');
-                            return ListTile(
-                              onTap: s.categoryId.isEmpty
-                                  ? null
-                                  : () => Get.toNamed(
-                                        s.subcategoryId.isEmpty
-                                            ? AppRoutes.adminCategory(s.categoryId)
-                                            : AppRoutes.adminSubcategory(s.categoryId, s.subcategoryId),
-                                      ),
-                              leading: CloudinaryImage(url: s.imageUrl, width: 48, height: 48),
-                              title: Text(s.name),
-                              subtitle: Text('$path · ${PriceUtils.format(s.sellingPrice)} · ${s.active ? 'Active' : 'Hidden'}'),
-                              trailing: Wrap(
-                                children: [
-                                  IconButton(icon: const Icon(Icons.edit), onPressed: () => _serviceForm(context, existing: s)),
-                                  IconButton(
-                                    icon: Icon(s.active ? Icons.visibility_off : Icons.visibility),
-                                    onPressed: () => repo.setActive(s.id, !s.active),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline),
-                                    onPressed: () => _confirmDelete(context, () => repo.delete(s.id)),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        )
-                        .toList(),
-                  );
-                },
+            stream: repo.watchAll(),
+            builder: (context, snap) {
+              final items = snap.data ?? [];
+              final cats = {for (final c in catSnap.data ?? <CategoryModel>[]) c.id: c.name};
+              return _AdminList(
+                createLabel: 'New service',
+                onCreate: () => _serviceForm(context),
+                emptyTitle: 'No services',
+                emptyMessage: 'Open a category and add services inside it.',
+                children: items
+                    .map(
+                      (s) => ListTile(
+                        onTap: s.categoryId.isEmpty ? null : () => Get.toNamed(AppRoutes.adminCategory(s.categoryId)),
+                        leading: CloudinaryImage(url: s.imageUrl, width: 48, height: 48),
+                        title: Text(s.name),
+                        subtitle: Text(
+                          '${cats[s.categoryId] ?? 'No category'} · ${PriceUtils.format(s.sellingPrice)} · ${s.active ? 'Active' : 'Inactive'}',
+                        ),
+                        trailing: _AdminActions(
+                          active: s.active,
+                          onActiveChanged: (v) => _setActive(() => repo.setActive(s.id, v)),
+                          onEdit: () => _serviceForm(context, existing: s),
+                          onDelete: () => _confirmDelete(context, () => repo.delete(s.id)),
+                        ),
+                      ),
+                    )
+                    .toList(),
               );
             },
           );
@@ -431,15 +261,12 @@ class AdminPackagesPage extends StatelessWidget {
                   (p) => ListTile(
                     leading: CloudinaryImage(url: p.imageUrl, width: 48, height: 48),
                     title: Text(p.name),
-                    subtitle: Text(PriceUtils.format(p.sellingPrice)),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(icon: const Icon(Icons.edit), onPressed: () => _packageForm(context, existing: p)),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _confirmDelete(context, () => repo.delete(p.id)),
-                        ),
-                      ],
+                    subtitle: Text('${PriceUtils.format(p.sellingPrice)} · ${p.active ? 'Active' : 'Inactive'}'),
+                    trailing: _AdminActions(
+                      active: p.active,
+                      onActiveChanged: (v) => _setActive(() => repo.setActive(p.id, v)),
+                      onEdit: () => _packageForm(context, existing: p),
+                      onDelete: () => _confirmDelete(context, () => repo.delete(p.id)),
                     ),
                   ),
                 )
@@ -499,15 +326,12 @@ class AdminOffersPage extends StatelessWidget {
                 .map(
                   (o) => ListTile(
                     title: Text(o.title),
-                    subtitle: Text(o.statusLabel),
-                    trailing: Wrap(
-                      children: [
-                        IconButton(icon: const Icon(Icons.edit), onPressed: () => _offerForm(context, existing: o)),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _confirmDelete(context, () => repo.delete(o.id)),
-                        ),
-                      ],
+                    subtitle: Text('${o.statusLabel} · ${o.active ? 'Active' : 'Inactive'}'),
+                    trailing: _AdminActions(
+                      active: o.active,
+                      onActiveChanged: (v) => _setActive(() => repo.setActive(o.id, v)),
+                      onEdit: () => _offerForm(context, existing: o),
+                      onDelete: () => _confirmDelete(context, () => repo.delete(o.id)),
                     ),
                   ),
                 )
@@ -592,6 +416,57 @@ class _AdminList extends StatelessWidget {
   }
 }
 
+Future<void> _setActive(Future<void> Function() action) async {
+  try {
+    await action();
+  } catch (e) {
+    Get.snackbar('Status not updated', ErrorHandler.message(e));
+  }
+}
+
+class _AdminActions extends StatelessWidget {
+  final bool active;
+  final ValueChanged<bool> onActiveChanged;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const _AdminActions({
+    required this.active,
+    required this.onActiveChanged,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {},
+      child: FittedBox(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              active ? 'Active' : 'Inactive',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: active ? AppColors.success : AppColors.danger,
+              ),
+            ),
+            Switch.adaptive(
+              value: active,
+              activeThumbColor: AppColors.success,
+              onChanged: onActiveChanged,
+            ),
+            IconButton(tooltip: 'Edit', icon: const Icon(Icons.edit_outlined), onPressed: onEdit),
+            IconButton(tooltip: 'Delete', icon: const Icon(Icons.delete_outline), onPressed: onDelete),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 Future<void> _confirmDelete(BuildContext context, Future<void> Function() action) async {
   final ok = await showDialog<bool>(
     context: context,
@@ -623,7 +498,6 @@ Future<void> _categoryForm(BuildContext context, CategoryRepository repo, {Categ
   final desc = TextEditingController(text: existing?.description ?? '');
   var imageUrl = existing?.imageUrl ?? '';
   var publicId = existing?.imagePublicId ?? '';
-  var featured = existing?.featured ?? false;
   var active = existing?.active ?? true;
   await Get.dialog(
     AlertDialog(
@@ -651,7 +525,6 @@ Future<void> _categoryForm(BuildContext context, CategoryRepository repo, {Categ
                         publicId = '';
                       }),
                     ),
-                    SwitchListTile(title: const Text('Featured'), value: featured, onChanged: (v) => setLocal(() => featured = v)),
                     SwitchListTile(title: const Text('Active'), value: active, onChanged: (v) => setLocal(() => active = v)),
                   ],
                 ),
@@ -673,7 +546,6 @@ Future<void> _categoryForm(BuildContext context, CategoryRepository repo, {Categ
                 description: desc.text.trim(),
                 imageUrl: imageUrl,
                 imagePublicId: publicId,
-                featured: featured,
                 active: active,
                 sortOrder: existing?.sortOrder ?? 99,
                 serviceCount: existing?.serviceCount ?? 0,
@@ -689,83 +561,10 @@ Future<void> _categoryForm(BuildContext context, CategoryRepository repo, {Categ
   );
 }
 
-Future<void> _subForm(
-  BuildContext context,
-  SubcategoryRepository repo,
-  CategoryRepository cats, {
-  SubcategoryModel? existing,
-  String? lockedCategoryId,
-}) async {
-  final name = TextEditingController(text: existing?.name ?? '');
-  final desc = TextEditingController(text: existing?.description ?? '');
-  var categoryId = lockedCategoryId ?? existing?.categoryId ?? '';
-  var imageUrl = existing?.imageUrl ?? '';
-  final allCats = await cats.fetchAll();
-  if (categoryId.isEmpty && allCats.isNotEmpty) categoryId = allCats.first.id;
-  if (!context.mounted) return;
-  await showDialog<void>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(existing == null ? 'New subcategory' : 'Edit subcategory'),
-      content: SizedBox(
-        width: 420,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (lockedCategoryId == null)
-              DropdownButtonFormField<String>(
-                initialValue: categoryId.isEmpty ? null : categoryId,
-                items: allCats.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-                onChanged: (v) => categoryId = v ?? '',
-                decoration: const InputDecoration(labelText: 'Category'),
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    allCats.where((c) => c.id == categoryId).map((c) => c.name).firstWhere((_) => true, orElse: () => 'This category'),
-                    style: AppTextStyles.small,
-                  ),
-                ),
-              ),
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Name')),
-            TextField(controller: desc, decoration: const InputDecoration(labelText: 'Description')),
-            ImageUploader(url: imageUrl, onUploaded: (a) => imageUrl = a.url),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-        TextButton(
-          onPressed: () async {
-            if (name.text.isEmpty || categoryId.isEmpty) return;
-            await repo.save(
-              SubcategoryModel(
-                id: existing?.id ?? '',
-                categoryId: categoryId,
-                name: name.text.trim(),
-                slug: SlugUtils.from(name.text),
-                description: desc.text.trim(),
-                imageUrl: imageUrl,
-                createdAt: existing?.createdAt,
-              ),
-            );
-            if (ctx.mounted) Navigator.pop(ctx);
-          },
-          child: const Text('Save'),
-        ),
-      ],
-    ),
-  );
-}
-
 Future<void> _serviceForm(
   BuildContext context, {
   ServiceModel? existing,
   String? lockedCategoryId,
-  String? lockedSubcategoryId,
 }) async {
   final cats = await CategoryRepository().fetchAll();
   final name = TextEditingController(text: existing?.name ?? '');
@@ -775,15 +574,10 @@ Future<void> _serviceForm(
   final price = TextEditingController(text: existing?.sellingPrice.toString() ?? '');
   final duration = TextEditingController(text: existing?.durationMinutes.toString() ?? '60');
   var categoryId = lockedCategoryId ?? existing?.categoryId ?? (cats.isNotEmpty ? cats.first.id : '');
-  var subcategoryId = lockedSubcategoryId ?? existing?.subcategoryId ?? '';
   var imageUrl = existing?.imageUrl ?? '';
   var publicId = existing?.imagePublicId ?? '';
-  var featured = existing?.featured ?? false;
   var popular = existing?.popular ?? false;
-  var subs = categoryId.isEmpty ? <SubcategoryModel>[] : await SubcategoryRepository().byCategoryAll(categoryId);
-  if (subcategoryId.isEmpty && lockedSubcategoryId == null && subs.isNotEmpty) {
-    subcategoryId = subs.first.id;
-  }
+  var active = existing?.active ?? true;
   if (!context.mounted) return;
   await showDialog<void>(
     context: context,
@@ -800,15 +594,7 @@ Future<void> _serviceForm(
                     DropdownButtonFormField<String>(
                       initialValue: categoryId.isEmpty ? null : categoryId,
                       items: cats.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-                      onChanged: (v) async {
-                        categoryId = v ?? '';
-                        subcategoryId = '';
-                        subs = categoryId.isEmpty
-                            ? []
-                            : await SubcategoryRepository().byCategoryAll(categoryId);
-                        if (subs.isNotEmpty) subcategoryId = subs.first.id;
-                        setLocal(() {});
-                      },
+                      onChanged: (v) => setLocal(() => categoryId = v ?? ''),
                       decoration: const InputDecoration(labelText: 'Category'),
                     )
                   else
@@ -817,33 +603,6 @@ Future<void> _serviceForm(
                       child: Text(
                         cats.where((c) => c.id == categoryId).map((c) => c.name).firstWhere((_) => true, orElse: () => 'Category'),
                         style: AppTextStyles.small,
-                      ),
-                    ),
-                  if (lockedSubcategoryId == null)
-                    DropdownButtonFormField<String>(
-                      key: ValueKey('$categoryId-$subcategoryId-${subs.length}'),
-                      initialValue: subs.any((s) => s.id == subcategoryId) ? subcategoryId : null,
-                      items: subs.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
-                      onChanged: (v) => setLocal(() => subcategoryId = v ?? ''),
-                      decoration: const InputDecoration(labelText: 'Subcategory'),
-                    )
-                  else
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 6, bottom: 8),
-                        child: Text(
-                          subs.where((s) => s.id == subcategoryId).map((s) => s.name).firstWhere((_) => true, orElse: () => 'Subcategory'),
-                          style: AppTextStyles.small,
-                        ),
-                      ),
-                    ),
-                  if (subs.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 8),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('Add a subcategory in this category first.'),
                       ),
                     ),
                   TextField(controller: name, decoration: const InputDecoration(labelText: 'Service name')),
@@ -859,7 +618,7 @@ Future<void> _serviceForm(
                       publicId = a.publicId;
                     },
                   ),
-                  SwitchListTile(title: const Text('Featured'), value: featured, onChanged: (v) => setLocal(() => featured = v)),
+                  SwitchListTile(title: const Text('Show on website (Active)'), value: active, onChanged: (v) => setLocal(() => active = v)),
                   SwitchListTile(title: const Text('Popular'), value: popular, onChanged: (v) => setLocal(() => popular = v)),
                 ],
               ),
@@ -873,8 +632,8 @@ Future<void> _serviceForm(
           onPressed: () async {
             final mrpVal = PriceUtils.toDouble(mrp.text);
             final sellVal = PriceUtils.toDouble(price.text);
-            if (name.text.isEmpty || categoryId.isEmpty || subcategoryId.isEmpty || mrpVal < 0 || sellVal < 0) {
-              Get.snackbar('Incomplete', 'Choose a category and subcategory, then add a name and price.');
+            if (name.text.isEmpty || categoryId.isEmpty || mrpVal < 0 || sellVal < 0) {
+              Get.snackbar('Incomplete', 'Choose a category, then add a name and price.');
               return;
             }
             if (PriceUtils.sellingExceedsMrp(mrpVal, sellVal)) {
@@ -887,7 +646,6 @@ Future<void> _serviceForm(
                 name: name.text.trim(),
                 slug: SlugUtils.from(name.text),
                 categoryId: categoryId,
-                subcategoryId: subcategoryId,
                 shortDescription: short.text.trim(),
                 description: desc.text.trim(),
                 imageUrl: imageUrl,
@@ -895,8 +653,8 @@ Future<void> _serviceForm(
                 mrp: mrpVal,
                 sellingPrice: sellVal,
                 durationMinutes: int.tryParse(duration.text) ?? 60,
-                featured: featured,
                 popular: popular,
+                active: active,
                 createdAt: existing?.createdAt,
               ),
             );
@@ -919,6 +677,7 @@ Future<void> _packageForm(BuildContext context, {PackageModel? existing}) async 
   final price = TextEditingController(text: existing?.sellingPrice.toString() ?? '');
   var selected = [...?existing?.serviceIds];
   var imageUrl = existing?.imageUrl ?? '';
+  var active = existing?.active ?? true;
   await Get.dialog(
     AlertDialog(
       title: Text(existing == null ? 'New package' : 'Edit package'),
@@ -935,6 +694,7 @@ Future<void> _packageForm(BuildContext context, {PackageModel? existing}) async 
                   ImageUploader(url: imageUrl, onUploaded: (a) => setLocal(() => imageUrl = a.url)),
                   Text('Auto MRP: ${PriceUtils.format(mrp)}'),
                   TextField(controller: price, decoration: const InputDecoration(labelText: 'Package price')),
+                  SwitchListTile(title: const Text('Show on website (Active)'), value: active, onChanged: (v) => setLocal(() => active = v)),
                   ...services.map(
                     (s) => CheckboxListTile(
                       value: selected.contains(s.id),
@@ -975,6 +735,7 @@ Future<void> _packageForm(BuildContext context, {PackageModel? existing}) async 
                 serviceIds: selected,
                 mrp: mrp,
                 sellingPrice: selling,
+                active: active,
                 createdAt: existing?.createdAt,
               ),
             );
@@ -1023,27 +784,37 @@ Future<void> _offerForm(BuildContext context, {OfferModel? existing}) async {
   final value = TextEditingController(text: existing?.discountValue.toString() ?? '10');
   var type = existing?.discountType ?? 'percentage';
   var imageUrl = existing?.bannerUrl ?? '';
+  var active = existing?.active ?? true;
   await Get.dialog(
     AlertDialog(
       title: Text(existing == null ? 'New offer' : 'Edit offer'),
       content: SizedBox(
         width: 460,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
-            TextField(controller: desc, decoration: const InputDecoration(labelText: 'Description')),
-            DropdownButtonFormField<String>(
-              initialValue: type,
-              items: const [
-                DropdownMenuItem(value: 'percentage', child: Text('Percentage')),
-                DropdownMenuItem(value: 'fixed', child: Text('Fixed amount')),
+        child: StatefulBuilder(
+          builder: (context, setLocal) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
+                TextField(controller: desc, decoration: const InputDecoration(labelText: 'Description')),
+                DropdownButtonFormField<String>(
+                  initialValue: type,
+                  items: const [
+                    DropdownMenuItem(value: 'percentage', child: Text('Percentage')),
+                    DropdownMenuItem(value: 'fixed', child: Text('Fixed amount')),
+                  ],
+                  onChanged: (v) => setLocal(() => type = v ?? 'percentage'),
+                ),
+                TextField(controller: value, decoration: const InputDecoration(labelText: 'Value')),
+                ImageUploader(url: imageUrl, onUploaded: (a) => setLocal(() => imageUrl = a.url)),
+                SwitchListTile(
+                  title: const Text('Show on website (Active)'),
+                  value: active,
+                  onChanged: (v) => setLocal(() => active = v),
+                ),
               ],
-              onChanged: (v) => type = v ?? 'percentage',
-            ),
-            TextField(controller: value, decoration: const InputDecoration(labelText: 'Value')),
-            ImageUploader(url: imageUrl, onUploaded: (a) => imageUrl = a.url),
-          ],
+            );
+          },
         ),
       ),
       actions: [
@@ -1060,6 +831,7 @@ Future<void> _offerForm(BuildContext context, {OfferModel? existing}) async {
                 bannerUrl: imageUrl,
                 startAt: existing?.startAt ?? DateTime.now(),
                 endAt: existing?.endAt ?? DateTime.now().add(const Duration(days: 14)),
+                active: active,
                 createdAt: existing?.createdAt,
               ),
             );

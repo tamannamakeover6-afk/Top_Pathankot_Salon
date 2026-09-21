@@ -10,7 +10,6 @@ class CategoryModel {
   final String imageUrl;
   final String imagePublicId;
   final int sortOrder;
-  final bool featured;
   final bool active;
   final int serviceCount;
   final DateTime? createdAt;
@@ -24,7 +23,6 @@ class CategoryModel {
     this.imageUrl = '',
     this.imagePublicId = '',
     this.sortOrder = 0,
-    this.featured = false,
     this.active = true,
     this.serviceCount = 0,
     this.createdAt,
@@ -45,7 +43,6 @@ class CategoryModel {
       imageUrl: map['imageUrl']?.toString() ?? '',
       imagePublicId: map['imagePublicId']?.toString() ?? '',
       sortOrder: (map['sortOrder'] as num?)?.toInt() ?? 0,
-      featured: map['featured'] == true,
       active: map['active'] != false,
       serviceCount: (map['serviceCount'] as num?)?.toInt() ?? 0,
       createdAt: DateParser.parse(map['createdAt']),
@@ -62,7 +59,6 @@ class CategoryModel {
         'imageUrl': imageUrl,
         'imagePublicId': imagePublicId,
         'sortOrder': sortOrder,
-        'featured': featured,
         'active': active,
         'serviceCount': serviceCount,
         'createdAt': createdAt != null
@@ -70,31 +66,4 @@ class CategoryModel {
             : FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
-
-  CategoryModel copyWith({
-    String? name,
-    String? slug,
-    String? description,
-    String? imageUrl,
-    String? imagePublicId,
-    int? sortOrder,
-    bool? featured,
-    bool? active,
-    int? serviceCount,
-  }) {
-    return CategoryModel(
-      id: id,
-      name: name ?? this.name,
-      slug: slug ?? this.slug,
-      description: description ?? this.description,
-      imageUrl: imageUrl ?? this.imageUrl,
-      imagePublicId: imagePublicId ?? this.imagePublicId,
-      sortOrder: sortOrder ?? this.sortOrder,
-      featured: featured ?? this.featured,
-      active: active ?? this.active,
-      serviceCount: serviceCount ?? this.serviceCount,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    );
-  }
 }

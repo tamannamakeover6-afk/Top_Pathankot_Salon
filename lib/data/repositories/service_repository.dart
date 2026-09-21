@@ -4,28 +4,16 @@ import 'package:tamanna/data/models/service_model.dart';
 
 class ServiceQuery {
   final String? categoryId;
-  final String? subcategoryId;
   final double? minPrice;
   final double? maxPrice;
-  final double? minRating;
-  final bool? featured;
-  final bool? popular;
-  final bool? discounted;
-  final int? maxDuration;
   final String sort;
   final int limit;
 
   const ServiceQuery({
     this.categoryId,
-    this.subcategoryId,
     this.minPrice,
     this.maxPrice,
-    this.minRating,
-    this.featured,
-    this.popular,
-    this.discounted,
-    this.maxDuration,
-    this.sort = 'popular',
+    this.sort = 'newest',
     this.limit = 24,
   });
 }
@@ -38,19 +26,11 @@ class ServiceRepository {
     if (q.categoryId != null && q.categoryId!.isNotEmpty) {
       query = query.where('categoryId', isEqualTo: q.categoryId);
     }
-    if (q.subcategoryId != null && q.subcategoryId!.isNotEmpty) {
-      query = query.where('subcategoryId', isEqualTo: q.subcategoryId);
-    }
-    if (q.featured == true) query = query.where('featured', isEqualTo: true);
-    if (q.popular == true) query = query.where('popular', isEqualTo: true);
     if (q.minPrice != null) {
       query = query.where('sellingPrice', isGreaterThanOrEqualTo: q.minPrice);
     }
     if (q.maxPrice != null) {
       query = query.where('sellingPrice', isLessThanOrEqualTo: q.maxPrice);
-    }
-    if (q.minRating != null) {
-      query = query.where('rating', isGreaterThanOrEqualTo: q.minRating);
     }
 
     switch (q.sort) {
@@ -63,14 +43,11 @@ class ServiceRepository {
       case 'rating':
         query = query.orderBy('rating', descending: true);
         break;
-      case 'discount':
-        query = query.orderBy('discountPercent', descending: true);
-        break;
       case 'newest':
         query = query.orderBy('createdAt', descending: true);
         break;
       default:
-        query = query.orderBy('rating', descending: true);
+        query = query.orderBy('createdAt', descending: true);
         break;
     }
     return query.limit(q.limit);
@@ -79,22 +56,12 @@ class ServiceRepository {
   Future<List<ServiceModel>> query(ServiceQuery q) async {
     try {
       final snap = await _base(q).get();
-      var items = snap.docs.map(ServiceModel.fromDoc).toList();
-      if (q.discounted == true) {
-        items = items.where((e) => e.discountPercent > 0).toList();
-      }
-      if (q.maxDuration != null) {
-        items = items.where((e) => e.durationMinutes <= q.maxDuration!).toList();
-      }
-      return items;
+      return snap.docs.map(ServiceModel.fromDoc).toList();
     } on FirebaseException {
       final fallback = await _col.where('active', isEqualTo: true).limit(q.limit).get();
       var items = fallback.docs.map(ServiceModel.fromDoc).toList();
       if (q.categoryId != null) {
         items = items.where((e) => e.categoryId == q.categoryId).toList();
-      }
-      if (q.subcategoryId != null && q.subcategoryId!.isNotEmpty) {
-        items = items.where((e) => e.subcategoryId == q.subcategoryId).toList();
       }
       return _sortLocal(items, q.sort);
     }
@@ -112,20 +79,11 @@ class ServiceRepository {
       case 'rating':
         copy.sort((a, b) => b.rating.compareTo(a.rating));
         break;
-      case 'discount':
-        copy.sort((a, b) => b.discountPercent.compareTo(a.discountPercent));
-        break;
       default:
-        copy.sort((a, b) => (b.popular ? 1 : 0).compareTo(a.popular ? 1 : 0));
+        copy.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
     }
     return copy;
   }
-
-  Future<List<ServiceModel>> featured({int limit = 8}) =>
-      query(ServiceQuery(featured: true, sort: 'rating', limit: limit));
-
-  Future<List<ServiceModel>> popular({int limit = 8}) =>
-      query(ServiceQuery(popular: true, limit: limit));
 
   Future<ServiceModel?> bySlug(String slug) async {
     final snap = await _col.where('slug', isEqualTo: slug).limit(1).get();
@@ -174,14 +132,6 @@ class ServiceRepository {
     });
   }
 
-  Stream<List<ServiceModel>> watchBySubcategory(String subcategoryId) {
-    return _col.where('subcategoryId', isEqualTo: subcategoryId).snapshots().map((s) {
-      final items = s.docs.map(ServiceModel.fromDoc).toList();
-      items.sort((a, b) => a.name.compareTo(b.name));
-      return items;
-    });
-  }
-
   Future<String> save(ServiceModel model) async {
     if (model.id.isEmpty) {
       final ref = await _col.add(model.toMap());
@@ -192,7 +142,7 @@ class ServiceRepository {
   }
 
   Future<void> setActive(String id, bool active) =>
-      _col.doc(id).update({'active': active, 'updatedAt': FieldValue.serverTimestamp()});
+      _col.doc(id).set({'active': active, 'updatedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
 
   Future<void> delete(String id) => _col.doc(id).delete();
 

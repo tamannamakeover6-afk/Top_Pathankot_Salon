@@ -9,23 +9,6 @@
       ]
     },
     {
-      "collectionGroup": "subcategories",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "active", "order": "ASCENDING" },
-        { "fieldPath": "sortOrder", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "subcategories",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "slug", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "services",
       "queryScope": "COLLECTION",
       "fields": [
@@ -40,8 +23,7 @@
       "fields": [
         { "fieldPath": "active", "order": "ASCENDING" },
         { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "subcategoryId", "order": "ASCENDING" },
-        { "fieldPath": "sellingPrice", "order": "ASCENDING" }
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
     {
@@ -49,16 +31,6 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "active", "order": "ASCENDING" },
-        { "fieldPath": "popular", "order": "DESCENDING" },
-        { "fieldPath": "rating", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "services",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "active", "order": "ASCENDING" },
-        { "fieldPath": "featured", "order": "ASCENDING" },
         { "fieldPath": "rating", "order": "DESCENDING" }
       ]
     },

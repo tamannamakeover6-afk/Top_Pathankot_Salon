@@ -62,7 +62,7 @@ class CategoryRepository {
   }
 
   Future<void> setActive(String id, bool active) =>
-      _col.doc(id).update({'active': active, 'updatedAt': FieldValue.serverTimestamp()});
+      _col.doc(id).set({'active': active, 'updatedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
 
   Future<void> delete(String id) => _col.doc(id).delete();
 

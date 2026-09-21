@@ -15,7 +15,6 @@ class PackageModel {
   final double mrp;
   final double sellingPrice;
   final double discountPercent;
-  final bool featured;
   final bool active;
   final DateTime? startAt;
   final DateTime? endAt;
@@ -33,7 +32,6 @@ class PackageModel {
     this.mrp = 0,
     this.sellingPrice = 0,
     this.discountPercent = 0,
-    this.featured = false,
     this.active = true,
     this.startAt,
     this.endAt,
@@ -61,7 +59,6 @@ class PackageModel {
       discountPercent: PriceUtils.toDouble(map['discountPercent']) > 0
           ? PriceUtils.toDouble(map['discountPercent'])
           : PriceUtils.discountPercent(mrp, selling),
-      featured: map['featured'] == true,
       active: map['active'] != false,
       startAt: DateParser.parse(map['startAt']),
       endAt: DateParser.parse(map['endAt']),
@@ -84,7 +81,6 @@ class PackageModel {
       'mrp': mrp,
       'sellingPrice': sellingPrice,
       'discountPercent': percent,
-      'featured': featured,
       'active': active,
       'startAt': startAt != null ? Timestamp.fromDate(startAt!) : null,
       'endAt': endAt != null ? Timestamp.fromDate(endAt!) : null,

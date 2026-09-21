@@ -8,7 +8,6 @@ class ServiceModel {
   final String name;
   final String slug;
   final String categoryId;
-  final String subcategoryId;
   final String shortDescription;
   final String description;
   final String imageUrl;
@@ -24,7 +23,6 @@ class ServiceModel {
   final List<String> faqs;
   final double rating;
   final int reviewCount;
-  final bool featured;
   final bool popular;
   final bool active;
   final DateTime? createdAt;
@@ -34,7 +32,6 @@ class ServiceModel {
     required this.name,
     required this.slug,
     required this.categoryId,
-    this.subcategoryId = '',
     this.shortDescription = '',
     this.description = '',
     this.imageUrl = '',
@@ -50,7 +47,6 @@ class ServiceModel {
     this.faqs = const [],
     this.rating = 0,
     this.reviewCount = 0,
-    this.featured = false,
     this.popular = false,
     this.active = true,
     this.createdAt,
@@ -68,7 +64,6 @@ class ServiceModel {
       name: map['name']?.toString() ?? '',
       slug: map['slug']?.toString() ?? SlugUtils.from(map['name']?.toString() ?? ''),
       categoryId: map['categoryId']?.toString() ?? '',
-      subcategoryId: map['subcategoryId']?.toString() ?? '',
       shortDescription: map['shortDescription']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
       imageUrl: map['imageUrl']?.toString() ?? '',
@@ -86,7 +81,6 @@ class ServiceModel {
       faqs: List<String>.from(map['faqs'] ?? const []),
       rating: PriceUtils.toDouble(map['rating']),
       reviewCount: (map['reviewCount'] as num?)?.toInt() ?? 0,
-      featured: map['featured'] == true,
       popular: map['popular'] == true,
       active: map['active'] != false,
       createdAt: DateParser.parse(map['createdAt']),
@@ -101,7 +95,6 @@ class ServiceModel {
       'nameLower': SlugUtils.searchable(name),
       'searchKeywords': SlugUtils.keywords('$name $shortDescription $description'),
       'categoryId': categoryId,
-      'subcategoryId': subcategoryId,
       'shortDescription': shortDescription,
       'description': description,
       'imageUrl': imageUrl,
@@ -117,7 +110,6 @@ class ServiceModel {
       'faqs': faqs,
       'rating': rating,
       'reviewCount': reviewCount,
-      'featured': featured,
       'popular': popular,
       'active': active,
       'createdAt': createdAt != null
@@ -125,55 +117,5 @@ class ServiceModel {
           : FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
-  }
-
-  ServiceModel copyWith({
-    String? name,
-    String? slug,
-    String? categoryId,
-    String? subcategoryId,
-    String? shortDescription,
-    String? description,
-    String? imageUrl,
-    String? imagePublicId,
-    List<String>? gallery,
-    double? mrp,
-    double? sellingPrice,
-    int? durationMinutes,
-    List<String>? benefits,
-    List<String>? includedItems,
-    List<String>? terms,
-    bool? featured,
-    bool? popular,
-    bool? active,
-  }) {
-    final nextMrp = mrp ?? this.mrp;
-    final nextSelling = sellingPrice ?? this.sellingPrice;
-    return ServiceModel(
-      id: id,
-      name: name ?? this.name,
-      slug: slug ?? this.slug,
-      categoryId: categoryId ?? this.categoryId,
-      subcategoryId: subcategoryId ?? this.subcategoryId,
-      shortDescription: shortDescription ?? this.shortDescription,
-      description: description ?? this.description,
-      imageUrl: imageUrl ?? this.imageUrl,
-      imagePublicId: imagePublicId ?? this.imagePublicId,
-      gallery: gallery ?? this.gallery,
-      mrp: nextMrp,
-      sellingPrice: nextSelling,
-      discountPercent: PriceUtils.discountPercent(nextMrp, nextSelling),
-      durationMinutes: durationMinutes ?? this.durationMinutes,
-      benefits: benefits ?? this.benefits,
-      includedItems: includedItems ?? this.includedItems,
-      terms: terms ?? this.terms,
-      faqs: faqs,
-      rating: rating,
-      reviewCount: reviewCount,
-      featured: featured ?? this.featured,
-      popular: popular ?? this.popular,
-      active: active ?? this.active,
-      createdAt: createdAt,
-    );
   }
 }
