@@ -21,6 +21,13 @@ class CategoryRepository {
     });
   }
 
+  Future<List<CategoryModel>> fetchAll() async {
+    final snap = await _col.get();
+    final items = snap.docs.map(CategoryModel.fromDoc).toList();
+    items.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return items;
+  }
+
   Future<List<CategoryModel>> fetchActive() async {
     try {
       final snap = await _col.where('active', isEqualTo: true).orderBy('sortOrder').get();
@@ -57,8 +64,7 @@ class CategoryRepository {
   Future<void> setActive(String id, bool active) =>
       _col.doc(id).update({'active': active, 'updatedAt': FieldValue.serverTimestamp()});
 
-  Future<void> delete(String id) =>
-      _col.doc(id).update({'active': false, 'updatedAt': FieldValue.serverTimestamp()});
+  Future<void> delete(String id) => _col.doc(id).delete();
 
   Future<void> bumpServiceCount(String id, int delta) async {
     await _col.doc(id).update({'serviceCount': FieldValue.increment(delta)});

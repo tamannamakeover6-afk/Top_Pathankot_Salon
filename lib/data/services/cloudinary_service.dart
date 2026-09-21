@@ -40,7 +40,7 @@ class CloudinaryService {
     if (!url.contains('res.cloudinary.com') || !url.contains('/upload/')) {
       return url;
     }
-    final w = width ?? _widthFor(preset);
+    final w = width ?? widthFor(preset);
     final crop = preset == CloudinaryPreset.banner ? 'fill' : 'fill';
     final transformation = 'f_auto,q_auto,c_$crop,g_auto,w_$w';
     if (url.contains('/upload/f_auto') || url.contains('/upload/w_')) {
@@ -49,7 +49,7 @@ class CloudinaryService {
     return url.replaceFirst('/upload/', '/upload/$transformation/');
   }
 
-  static int _widthFor(CloudinaryPreset preset) {
+  static int widthFor(CloudinaryPreset preset) {
     switch (preset) {
       case CloudinaryPreset.thumb:
         return 240;

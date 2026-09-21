@@ -25,6 +25,7 @@ class TamannaHeader extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: ResponsiveContainer(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SizedBox(
             height: 76,
             child: Row(

@@ -21,6 +21,9 @@ Future<void> main() async {
     return true;
   };
 
+  PaintingBinding.instance.imageCache.maximumSize = 400;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 120 << 20;
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await Hive.initFlutter();

@@ -40,6 +40,8 @@ class PackageRepository {
   Future<void> setActive(String id, bool active) =>
       _col.doc(id).update({'active': active, 'updatedAt': FieldValue.serverTimestamp()});
 
+  Future<void> delete(String id) => _col.doc(id).delete();
+
   Future<void> updatePricing(String id, {required double mrp, required double sellingPrice}) {
     final percent = mrp <= 0 ? 0 : ((mrp - sellingPrice) / mrp) * 100;
     return _col.doc(id).update({

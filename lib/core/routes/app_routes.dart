@@ -21,8 +21,15 @@ class AppRoutes {
   static const terms = '/terms';
   static const admin = '/admin';
   static const adminCategories = '/admin/categories';
+  static const adminCategorySubs = '/admin/category/:categoryId';
+  static const adminSubcategoryServices = '/admin/category/:categoryId/sub/:subcategoryId';
   static const adminSubcategories = '/admin/subcategories';
   static const adminServices = '/admin/services';
+
+  static String adminCategory(String categoryId) => '/admin/category/$categoryId';
+
+  static String adminSubcategory(String categoryId, String subcategoryId) =>
+      '/admin/category/$categoryId/sub/$subcategoryId';
   static const adminPackages = '/admin/packages';
   static const adminPricing = '/admin/pricing';
   static const adminOffers = '/admin/offers';

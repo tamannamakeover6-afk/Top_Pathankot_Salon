@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tamanna/core/theme/app_colors.dart';
@@ -25,7 +24,9 @@ class CloudinaryImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolved = CloudinaryService.transform(url, preset: preset);
+    final effectivePreset =
+        (width != null && width!.isFinite && width! <= 96) ? CloudinaryPreset.thumb : preset;
+    final resolved = CloudinaryService.transform(url, preset: effectivePreset);
     final r = radius ?? AppRadius.card;
     if (resolved.isEmpty) {
       return Container(
@@ -35,23 +36,38 @@ class CloudinaryImage extends StatelessWidget {
         child: const Icon(Icons.spa_outlined, color: AppColors.rose),
       );
     }
+
+    final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
+    final logicalW = width != null && width!.isFinite ? width! : CloudinaryService.widthFor(effectivePreset).toDouble();
+    final cacheWidth = (logicalW * dpr).round().clamp(80, CloudinaryService.widthFor(effectivePreset) * 2);
+
     return ClipRRect(
       borderRadius: r,
-      child: CachedNetworkImage(
-        imageUrl: resolved,
-        width: width,
-        height: height,
-        fit: fit,
-        placeholder: (context, url) => Shimmer.fromColors(
-          baseColor: AppColors.cream,
-          highlightColor: AppColors.surface,
-          child: Container(width: width, height: height, color: AppColors.cream),
-        ),
-        errorWidget: (context, url, error) => Container(
+      child: ColoredBox(
+        color: AppColors.cream,
+        child: Image.network(
+          resolved,
+          key: ValueKey(resolved),
           width: width,
           height: height,
-          color: AppColors.cream,
-          child: const Icon(Icons.image_not_supported_outlined),
+          fit: fit,
+          gaplessPlayback: true,
+          filterQuality: FilterQuality.medium,
+          cacheWidth: cacheWidth,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return Shimmer.fromColors(
+              baseColor: AppColors.cream,
+              highlightColor: AppColors.surface,
+              child: Container(width: width, height: height, color: AppColors.cream),
+            );
+          },
+          errorBuilder: (context, error, stack) => Container(
+            width: width,
+            height: height,
+            color: AppColors.cream,
+            child: const Icon(Icons.image_not_supported_outlined),
+          ),
         ),
       ),
     );

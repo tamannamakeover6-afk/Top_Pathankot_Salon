@@ -11,7 +11,6 @@ import 'package:tamanna/data/models/review_model.dart';
 import 'package:tamanna/data/models/service_model.dart';
 import 'package:tamanna/data/repositories/review_repository.dart';
 import 'package:tamanna/data/repositories/service_repository.dart';
-import 'package:tamanna/features/favorites/favorites_controller.dart';
 import 'package:tamanna/features/shell/site_shell.dart';
 
 class ServiceDetailPage extends StatefulWidget {
@@ -127,25 +126,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
           ),
         ],
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: PrimaryButton(
-                label: 'Book Now',
-                onTap: () => Get.toNamed('/booking', parameters: {'service': s.slug}),
-              ),
-            ),
-            Obx(() {
-              final fav = Get.find<FavoritesController>();
-              return IconButton(
-                onPressed: () => fav.toggle(s.id),
-                icon: Icon(
-                  fav.isFavorite(s.id) ? Icons.favorite : Icons.favorite_border,
-                  color: AppColors.rose,
-                ),
-              );
-            }),
-          ],
+        PrimaryButton(
+          label: 'Book Now',
+          onTap: () => Get.toNamed('/booking', parameters: {'service': s.slug}),
         ),
       ],
     );

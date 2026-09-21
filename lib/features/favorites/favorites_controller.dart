@@ -1,37 +1,73 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:tamanna/data/repositories/favorite_repository.dart';
 import 'package:tamanna/features/auth/auth_controller.dart';
 
 class FavoritesController extends GetxController {
-  final FavoriteRepository repo = FavoriteRepository();
-  final ids = <String>{}.obs;
-
-  AuthController get _auth => Get.find<AuthController>();
+  final FavoriteRepository _repo = FavoriteRepository();
+  final RxSet<String> favoriteIds = <String>{}.obs;
+  StreamSubscription<Set<String>>? _sub;
 
   @override
   void onInit() {
     super.onInit();
-    ever(_auth.currentUser, (_) => _bind());
-    _bind();
-  }
+    final auth = Get.find<AuthController>();
+    ever(auth.currentUser, (user) {
+      _sub?.cancel();
+      if (user != null) {
+        _sub = _repo.watchIds(user.uid).listen((ids) {
+          favoriteIds.assignAll(ids);
+        });
+      } else {
+        favoriteIds.clear();
+      }
+    });
 
-  void _bind() {
-    final uid = _auth.currentUser.value?.uid;
-    if (uid == null || uid.isEmpty) {
-      ids.clear();
-      return;
+    final current = auth.currentUser.value;
+    if (current != null) {
+      _sub = _repo.watchIds(current.uid).listen((ids) {
+        favoriteIds.assignAll(ids);
+      });
     }
-    repo.watchIds(uid).listen((value) => ids.assignAll(value));
   }
 
-  bool isFavorite(String id) => ids.contains(id);
+  @override
+  void onClose() {
+    _sub?.cancel();
+    super.onClose();
+  }
+
+  bool isFavorite(String id) => favoriteIds.contains(id);
 
   Future<void> toggle(String id, {bool isPackage = false}) async {
-    final uid = _auth.currentUser.value?.uid;
-    if (uid == null || uid.isEmpty) {
-      Get.toNamed('/login');
+    final auth = Get.find<AuthController>();
+    if (!auth.isLoggedIn) {
+      // Local optimistic toggle if guest
+      if (favoriteIds.contains(id)) {
+        favoriteIds.remove(id);
+      } else {
+        favoriteIds.add(id);
+      }
       return;
     }
-    await repo.toggle(uid, id, isPackage: isPackage);
+
+    final uid = auth.currentUser.value!.uid;
+    // Optimistic UI update
+    if (favoriteIds.contains(id)) {
+      favoriteIds.remove(id);
+    } else {
+      favoriteIds.add(id);
+    }
+
+    try {
+      await _repo.toggle(uid, id, isPackage: isPackage);
+    } catch (_) {
+      // Rollback on error
+      if (favoriteIds.contains(id)) {
+        favoriteIds.remove(id);
+      } else {
+        favoriteIds.add(id);
+      }
+    }
   }
 }

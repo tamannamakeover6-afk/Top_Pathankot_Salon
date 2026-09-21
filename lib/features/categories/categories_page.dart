@@ -40,9 +40,9 @@ class CategoriesPage extends StatelessWidget {
                   itemCount: cats.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: Breakpoints.gridCount(context),
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.95,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20,
+                    mainAxisExtent: 225,
                   ),
                   itemBuilder: (_, i) => CategoryCard(category: cats[i]),
                 ),
@@ -572,9 +572,9 @@ class _ListingGrid extends StatelessWidget {
         itemCount: 6,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columns,
-          mainAxisSpacing: 20,
-          crossAxisSpacing: 20,
-          childAspectRatio: 0.78,
+          mainAxisSpacing: 28,
+          crossAxisSpacing: 24,
+          mainAxisExtent: 285,
         ),
         itemBuilder: (context, index) => const SkeletonServiceCard(),
       );
@@ -594,9 +594,9 @@ class _ListingGrid extends StatelessWidget {
       itemCount: catalog.listing.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
-        childAspectRatio: 0.76,
+        mainAxisSpacing: 28,
+        crossAxisSpacing: 24,
+        mainAxisExtent: 285,
       ),
       itemBuilder: (_, i) => ServiceCard(service: catalog.listing[i]),
     );

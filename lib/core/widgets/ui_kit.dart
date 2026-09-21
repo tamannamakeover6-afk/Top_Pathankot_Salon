@@ -18,12 +18,20 @@ class ResponsiveContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
-    final horizontal = w < 600 ? 12.0 : 16.0;
-    return SizedBox(
-      width: double.infinity,
-      child: Padding(
-        padding: padding ?? EdgeInsets.symmetric(horizontal: horizontal),
-        child: child,
+    final horizontal = w < 600
+        ? 20.0
+        : w < 1024
+            ? 36.0
+            : w < 1440
+                ? 56.0
+                : 72.0;
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Padding(
+          padding: padding ?? EdgeInsets.symmetric(horizontal: horizontal),
+          child: child,
+        ),
       ),
     );
   }

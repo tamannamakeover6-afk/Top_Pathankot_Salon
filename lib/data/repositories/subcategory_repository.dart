@@ -6,12 +6,15 @@ class SubcategoryRepository {
   final _col = FirebaseFirestore.instance.collection(Collections.subcategories);
 
   Stream<List<SubcategoryModel>> watchByCategory(String categoryId) {
-    return _col
-        .where('categoryId', isEqualTo: categoryId)
-        .where('active', isEqualTo: true)
-        .orderBy('sortOrder')
-        .snapshots()
-        .map((s) => s.docs.map(SubcategoryModel.fromDoc).toList());
+    return watchAllByCategory(categoryId).map((items) => items.where((e) => e.active).toList());
+  }
+
+  Stream<List<SubcategoryModel>> watchAllByCategory(String categoryId) {
+    return _col.where('categoryId', isEqualTo: categoryId).snapshots().map((s) {
+      final items = s.docs.map(SubcategoryModel.fromDoc).toList();
+      items.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      return items;
+    });
   }
 
   Stream<List<SubcategoryModel>> watchAll() {
@@ -23,12 +26,21 @@ class SubcategoryRepository {
   }
 
   Future<List<SubcategoryModel>> byCategory(String categoryId) async {
-    final snap = await _col
-        .where('categoryId', isEqualTo: categoryId)
-        .where('active', isEqualTo: true)
-        .orderBy('sortOrder')
-        .get();
-    return snap.docs.map(SubcategoryModel.fromDoc).toList();
+    final items = await byCategoryAll(categoryId);
+    return items.where((e) => e.active).toList();
+  }
+
+  Future<List<SubcategoryModel>> byCategoryAll(String categoryId) async {
+    final snap = await _col.where('categoryId', isEqualTo: categoryId).get();
+    final items = snap.docs.map(SubcategoryModel.fromDoc).toList();
+    items.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return items;
+  }
+
+  Future<SubcategoryModel?> byId(String id) async {
+    final doc = await _col.doc(id).get();
+    if (!doc.exists) return null;
+    return SubcategoryModel.fromDoc(doc);
   }
 
   Future<SubcategoryModel?> bySlug(String categoryId, String slug) async {
@@ -53,6 +65,5 @@ class SubcategoryRepository {
   Future<void> setActive(String id, bool active) =>
       _col.doc(id).update({'active': active, 'updatedAt': FieldValue.serverTimestamp()});
 
-  Future<void> delete(String id) =>
-      _col.doc(id).update({'active': false, 'updatedAt': FieldValue.serverTimestamp()});
+  Future<void> delete(String id) => _col.doc(id).delete();
 }

@@ -36,6 +36,12 @@ class AppPages {
     GetPage(name: AppRoutes.terms, page: () => const TermsPage()),
     GetPage(name: AppRoutes.admin, page: () => const AdminDashboardPage(), middlewares: [AdminGuard()]),
     GetPage(name: AppRoutes.adminCategories, page: () => const AdminCategoriesPage(), middlewares: [AdminGuard()]),
+    GetPage(name: AppRoutes.adminCategorySubs, page: () => const AdminCategorySubsPage(), middlewares: [AdminGuard()]),
+    GetPage(
+      name: AppRoutes.adminSubcategoryServices,
+      page: () => const AdminSubcategoryServicesPage(),
+      middlewares: [AdminGuard()],
+    ),
     GetPage(name: AppRoutes.adminSubcategories, page: () => const AdminSubcategoriesPage(), middlewares: [AdminGuard()]),
     GetPage(name: AppRoutes.adminServices, page: () => const AdminServicesPage(), middlewares: [AdminGuard()]),
     GetPage(name: AppRoutes.adminPackages, page: () => const AdminPackagesPage(), middlewares: [AdminGuard()]),

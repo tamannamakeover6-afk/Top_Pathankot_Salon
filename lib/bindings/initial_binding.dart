@@ -7,7 +7,8 @@ class InitialBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(AuthController(), permanent: true);
-    Get.put(FavoritesController(), permanent: true);
     Get.put(CatalogController(), permanent: true);
+    Get.put(FavoritesController(), permanent: true);
   }
 }
+

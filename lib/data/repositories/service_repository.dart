@@ -166,6 +166,22 @@ class ServiceRepository {
     return _col.snapshots().map((s) => s.docs.map(ServiceModel.fromDoc).toList());
   }
 
+  Stream<List<ServiceModel>> watchByCategory(String categoryId) {
+    return _col.where('categoryId', isEqualTo: categoryId).snapshots().map((s) {
+      final items = s.docs.map(ServiceModel.fromDoc).toList();
+      items.sort((a, b) => a.name.compareTo(b.name));
+      return items;
+    });
+  }
+
+  Stream<List<ServiceModel>> watchBySubcategory(String subcategoryId) {
+    return _col.where('subcategoryId', isEqualTo: subcategoryId).snapshots().map((s) {
+      final items = s.docs.map(ServiceModel.fromDoc).toList();
+      items.sort((a, b) => a.name.compareTo(b.name));
+      return items;
+    });
+  }
+
   Future<String> save(ServiceModel model) async {
     if (model.id.isEmpty) {
       final ref = await _col.add(model.toMap());
@@ -177,6 +193,8 @@ class ServiceRepository {
 
   Future<void> setActive(String id, bool active) =>
       _col.doc(id).update({'active': active, 'updatedAt': FieldValue.serverTimestamp()});
+
+  Future<void> delete(String id) => _col.doc(id).delete();
 
   Future<void> updatePricing(String id, {required double mrp, required double sellingPrice}) {
     final percent = mrp <= 0 ? 0 : ((mrp - sellingPrice) / mrp) * 100;

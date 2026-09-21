@@ -35,46 +35,42 @@ class _CategoryCardState extends State<CategoryCard> {
       onExit: (_) => setState(() => hover = false),
       child: GestureDetector(
         onTap: () => Get.toNamed('/categories/${c.slug}'),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          transform: Matrix4.translationValues(0, hover ? -6 : 0, 0),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: AppRadius.card,
-            boxShadow: hover ? AppShadows.hover : AppShadows.soft,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-                child: AnimatedScale(
-                  scale: hover ? 1.05 : 1,
-                  duration: const Duration(milliseconds: 280),
-                  child: CloudinaryImage(
-                    url: c.imageUrl,
-                    height: 150,
-                    width: double.infinity,
-                    radius: BorderRadius.zero,
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image box with rounded corners and subtle hover lift
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              transform: Matrix4.translationValues(0, hover ? -4 : 0, 0),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: hover ? AppShadows.hover : AppShadows.soft,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: CloudinaryImage(
+                  url: c.imageUrl,
+                  height: 160,
+                  width: double.infinity,
+                  radius: BorderRadius.circular(18),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(c.name, style: AppTextStyles.title),
-                    const SizedBox(height: 4),
-                    Text(
-                      c.serviceCount > 0 ? '${c.serviceCount} services' : 'Explore',
-                      style: AppTextStyles.small,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+            // Details outside the box
+            const SizedBox(height: 10),
+            Text(
+              c.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.title.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              c.serviceCount > 0 ? '${c.serviceCount} services' : 'Explore',
+              style: AppTextStyles.small.copyWith(color: AppColors.textSecondary),
+            ),
+          ],
         ),
       ),
     );
@@ -237,35 +233,32 @@ class _ServiceCardState extends State<ServiceCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
       onExit: (_) => setState(() => hover = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: hover ? AppColors.rose.withValues(alpha: 0.5) : AppColors.border.withValues(alpha: 0.6),
-            width: 1,
-          ),
-          boxShadow: hover ? AppShadows.hover : AppShadows.soft,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image with top-left eye preview & top-right heart wishlist
-            Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Image Box (Rounded container with subtle shadow & hover lift)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            transform: Matrix4.translationValues(0, hover ? -4 : 0, 0),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: hover ? AppShadows.hover : AppShadows.soft,
+            ),
+            child: Stack(
               children: [
                 GestureDetector(
                   onTap: () => Get.toNamed('/services/${s.slug}'),
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                    borderRadius: BorderRadius.circular(18),
                     child: AnimatedScale(
-                      scale: hover ? 1.04 : 1,
+                      scale: hover ? 1.03 : 1.0,
                       duration: const Duration(milliseconds: 260),
                       child: CloudinaryImage(
                         url: s.imageUrl,
-                        height: 180,
+                        height: 190,
                         width: double.infinity,
-                        radius: BorderRadius.zero,
+                        radius: BorderRadius.circular(18),
                         preset: CloudinaryPreset.card,
                       ),
                     ),
@@ -314,95 +307,94 @@ class _ServiceCardState extends State<ServiceCard> {
                     );
                   }),
                 ),
+                if (s.discountPercent > 0)
+                  Positioned(
+                    bottom: 10,
+                    left: 10,
+                    child: DiscountBadge(percent: s.discountPercent),
+                  ),
               ],
             ),
-            // Card Content matching reference screenshot
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Service Title
-                  GestureDetector(
-                    onTap: () => Get.toNamed('/services/${s.slug}'),
-                    child: Text(
-                      s.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.title.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        height: 1.25,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Price and duration row with right-aligned circular "+" button
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: '₹${s.sellingPrice.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      color: AppColors.textPrimary,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  if (s.durationMinutes > 0)
-                                    TextSpan(
-                                      text: ' / ${s.durationMinutes}minutes',
-                                      style: const TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                ],
+          ),
+
+          // 2. Details OUTSIDE the box, sitting directly on the page surface
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: () => Get.toNamed('/services/${s.slug}'),
+            child: Text(
+              s.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.title.copyWith(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+                height: 1.25,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '₹${s.sellingPrice.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                          if (s.durationMinutes > 0)
+                            TextSpan(
+                              text: '  / ${s.durationMinutes}min',
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 13,
                               ),
                             ),
-                            if (s.mrp > s.sellingPrice) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                '₹${s.mrp.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  color: AppColors.textHint,
-                                  fontSize: 12,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
+                        ],
                       ),
-                      // Circular Orange/Accent "+" Quick Add / Book Button
-                      Material(
-                        color: const Color(0xFFE8590C),
-                        shape: const CircleBorder(),
-                        elevation: 1,
-                        child: InkWell(
-                          customBorder: const CircleBorder(),
-                          onTap: () => Get.toNamed('/booking', parameters: {'service': s.slug}),
-                          child: const Padding(
-                            padding: EdgeInsets.all(7),
-                            child: Icon(Icons.add, color: Colors.white, size: 18),
-                          ),
+                    ),
+                    if (s.mrp > s.sellingPrice) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '₹${s.mrp.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          color: AppColors.textHint,
+                          fontSize: 12,
+                          decoration: TextDecoration.lineThrough,
                         ),
                       ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+              // Circular Orange/Accent "+" Quick Add / Book Button
+              Material(
+                color: const Color(0xFFE8590C),
+                shape: const CircleBorder(),
+                elevation: 1,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => Get.toNamed('/booking', parameters: {'service': s.slug}),
+                  child: const Padding(
+                    padding: EdgeInsets.all(7),
+                    child: Icon(Icons.add, color: Colors.white, size: 18),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -562,9 +554,9 @@ class ServiceGrid extends StatelessWidget {
       itemCount: services.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: count,
-        mainAxisSpacing: 18,
-        crossAxisSpacing: 18,
-        childAspectRatio: count == 1 ? 0.92 : 0.72,
+        mainAxisSpacing: 24,
+        crossAxisSpacing: 20,
+        mainAxisExtent: 285,
       ),
       itemBuilder: (_, i) => ServiceCard(service: services[i]),
     );
@@ -576,12 +568,34 @@ class SkeletonServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.cream,
-      highlightColor: AppColors.surface,
-      child: Container(
-        decoration: BoxDecoration(color: AppColors.cream, borderRadius: AppRadius.card),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Shimmer.fromColors(
+            baseColor: AppColors.cream,
+            highlightColor: AppColors.surface,
+            child: Container(
+              height: 190,
+              width: double.infinity,
+              color: AppColors.cream,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Shimmer.fromColors(
+          baseColor: AppColors.cream,
+          highlightColor: AppColors.surface,
+          child: Container(height: 14, width: 140, color: AppColors.cream),
+        ),
+        const SizedBox(height: 6),
+        Shimmer.fromColors(
+          baseColor: AppColors.cream,
+          highlightColor: AppColors.surface,
+          child: Container(height: 12, width: 90, color: AppColors.cream),
+        ),
+      ],
     );
   }
 }

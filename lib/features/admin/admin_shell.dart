@@ -7,7 +7,8 @@ import 'package:tamanna/features/auth/auth_controller.dart';
 class AdminShell extends StatelessWidget {
   final String title;
   final Widget child;
-  const AdminShell({super.key, required this.title, required this.child});
+  final VoidCallback? onBack;
+  const AdminShell({super.key, required this.title, required this.child, this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +35,9 @@ class AdminShell extends StatelessWidget {
                             icon: const Icon(Icons.menu),
                           ),
                         ),
-                      Text(title, style: AppTextStyles.h3),
-                      const Spacer(),
+                      if (onBack != null)
+                        IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
+                      Expanded(child: Text(title, style: AppTextStyles.h3, overflow: TextOverflow.ellipsis)),
                       TextButton(onPressed: () => Get.toNamed('/'), child: const Text('View site')),
                       IconButton(
                         onPressed: () => Get.find<AuthController>().logout(),

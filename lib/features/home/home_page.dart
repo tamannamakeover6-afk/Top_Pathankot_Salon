@@ -62,17 +62,19 @@ class _HomePageState extends State<HomePage> {
                     )
                   else
                     ServiceGrid(services: catalog.featuredServices),
-                  const SizedBox(height: 64),
-                  SectionHeader(
-                    eyebrow: 'This week',
-                    title: 'Live offers',
-                    action: 'All offers',
-                    onAction: () => Get.toNamed('/offers'),
-                  ),
-                  _HScroll(
-                    empty: 'No live offers right now.',
-                    children: catalog.offers.map((o) => OfferCard(offer: o)).toList(),
-                  ),
+                  if (catalog.offers.isNotEmpty) ...[
+                    const SizedBox(height: 64),
+                    SectionHeader(
+                      eyebrow: 'This week',
+                      title: 'Live offers',
+                      action: 'All offers',
+                      onAction: () => Get.toNamed('/offers'),
+                    ),
+                    _HScroll(
+                      empty: 'No live offers right now.',
+                      children: catalog.offers.map((o) => OfferCard(offer: o)).toList(),
+                    ),
+                  ],
                   const SizedBox(height: 64),
                   SectionHeader(
                     eyebrow: 'Bundles',
@@ -198,9 +200,9 @@ class _CategoryRow extends StatelessWidget {
       itemCount: cats.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: count,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.95,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        mainAxisExtent: 225,
       ),
       itemBuilder: (_, i) => CategoryCard(category: cats[i]),
     );
