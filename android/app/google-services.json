@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "523129926138",
+    "project_id": "tamanna-fa1aa",
+    "storage_bucket": "tamanna-fa1aa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523129926138:android:1bbe2a763e09fae4ddb443",
+        "android_client_info": {
+          "package_name": "com.example.tamanna"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1HeEZ-Y5M4M-rh5Osf-gvaaR2aTqc0Eg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

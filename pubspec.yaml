@@ -1,0 +1,36 @@
+name: tamanna
+description: Tamanna — premium at-home beauty services.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  firebase_core:
+  cloud_firestore:
+  firebase_auth:
+  hive_flutter:
+  get:
+  http:
+  file_picker:
+  cached_network_image: ^3.4.1
+  shimmer:
+  url_launcher:
+  google_fonts: ^6.2.1
+  intl: ^0.20.2
+  path_provider:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
