@@ -37,10 +37,31 @@ class OffersPage extends StatelessWidget {
                   if (offers.isEmpty)
                     const EmptyState(title: 'No live offers', message: 'Check back soon for seasonal savings.')
                   else
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: offers.map((o) => OfferCard(offer: o)).toList(),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final width = constraints.maxWidth;
+                        final columns = width < 640
+                            ? 1
+                            : width < 980
+                                ? 2
+                                : 3;
+                        const gap = 16.0;
+                        final itemWidth = (width - gap * (columns - 1)) / columns;
+                        return Wrap(
+                          spacing: gap,
+                          runSpacing: gap,
+                          alignment: WrapAlignment.start,
+                          crossAxisAlignment: WrapCrossAlignment.start,
+                          children: offers
+                              .map(
+                                (o) => SizedBox(
+                                  width: itemWidth,
+                                  child: OfferCard(offer: o, expand: true),
+                                ),
+                              )
+                              .toList(),
+                        );
+                      },
                     ),
                   const SizedBox(height: 40),
                 ],

@@ -25,12 +25,16 @@ class ResponsiveContainer extends StatelessWidget {
             : w < 1440
                 ? 56.0
                 : 72.0;
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: Padding(
-          padding: padding ?? EdgeInsets.symmetric(horizontal: horizontal),
-          child: child,
+    return SizedBox(
+      width: double.infinity,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Padding(
+            padding: padding ?? EdgeInsets.symmetric(horizontal: horizontal),
+            child: SizedBox(width: double.infinity, child: child),
+          ),
         ),
       ),
     );

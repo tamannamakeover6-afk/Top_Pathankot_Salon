@@ -57,10 +57,19 @@ class _PackagesPageState extends State<PackagesPage> {
                   const SizedBox(height: 6),
                   Text('Thoughtful combinations, priced as a complete ritual.', style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary)),
                   SizedBox(height: isMobile ? 16 : 24),
-                  Wrap(
-                    spacing: isMobile ? 12 : 16,
-                    runSpacing: isMobile ? 12 : 16,
-                    children: packs.map((p) => PackageCard(pack: p, width: isMobile ? double.infinity : 320)).toList(),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = constraints.maxWidth;
+                      final columns = width < 640 ? 1 : width < 980 ? 2 : 3;
+                      final gap = isMobile ? 12.0 : 16.0;
+                      final itemWidth = (width - gap * (columns - 1)) / columns;
+                      return Wrap(
+                        spacing: gap,
+                        runSpacing: gap,
+                        alignment: WrapAlignment.start,
+                        children: packs.map((p) => PackageCard(pack: p, width: itemWidth)).toList(),
+                      );
+                    },
                   ),
                   SizedBox(height: isMobile ? 24 : 40),
                 ],

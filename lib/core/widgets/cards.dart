@@ -420,19 +420,21 @@ class PackageCard extends StatelessWidget {
 
 class OfferCard extends StatelessWidget {
   final OfferModel offer;
-  const OfferCard({super.key, required this.offer});
+  final bool expand;
+  const OfferCard({super.key, required this.offer, this.expand = false});
 
   @override
   Widget build(BuildContext context) {
     final isMobile = Breakpoints.isMobile(context);
     return Container(
-      width: isMobile ? 270 : 360,
+      width: expand ? double.infinity : (isMobile ? 270 : 360),
       decoration: BoxDecoration(
         color: AppColors.ink,
         borderRadius: BorderRadius.circular(isMobile ? 14 : 18),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CloudinaryImage(
@@ -445,10 +447,13 @@ class OfferCard extends StatelessWidget {
           Padding(
             padding: EdgeInsets.all(isMobile ? 12 : 16),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   offer.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.title.copyWith(
                     color: Colors.white,
                     fontSize: isMobile ? 13.5 : 15,
@@ -459,15 +464,23 @@ class OfferCard extends StatelessWidget {
                   offer.discountType == 'fixed'
                       ? '₹${offer.discountValue.round()} off'
                       : '${offer.discountValue.round()}% off selected rituals',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.small.copyWith(
                     color: const Color(0xFFE8D5C8),
                     fontSize: isMobile ? 11 : 12,
                   ),
                 ),
                 SizedBox(height: isMobile ? 8 : 12),
-                SecondaryButton(
-                  label: 'Browse',
-                  onTap: () => Get.toNamed('/offers'),
+                TextButton(
+                  onPressed: () => Get.toNamed('/categories'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Browse', style: TextStyle(fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
