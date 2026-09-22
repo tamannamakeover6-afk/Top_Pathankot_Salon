@@ -4,7 +4,6 @@ import 'package:tamanna/core/responsive/breakpoints.dart';
 import 'package:tamanna/core/theme/app_colors.dart';
 import 'package:tamanna/core/theme/app_text_styles.dart';
 import 'package:tamanna/core/widgets/cards.dart';
-import 'package:tamanna/core/widgets/media_kit.dart';
 import 'package:tamanna/core/widgets/ui_kit.dart';
 import 'package:tamanna/features/catalog/catalog_controller.dart';
 import 'package:tamanna/features/shell/site_shell.dart';
@@ -29,7 +28,10 @@ class _HomePageState extends State<HomePage> {
     return SiteShell(
       child: Obx(() {
         if (catalog.homeError.isNotEmpty) {
-          return ErrorState(message: catalog.homeError.value, onRetry: catalog.loadHome);
+          return ErrorState(
+            message: catalog.homeError.value,
+            onRetry: catalog.loadHome,
+          );
         }
         return Column(
           children: [
@@ -41,7 +43,8 @@ class _HomePageState extends State<HomePage> {
                   SectionHeader(
                     eyebrow: 'Browse',
                     title: 'Find your ritual',
-                    subtitle: 'Categories you can book at home, on your schedule.',
+                    subtitle:
+                        'Categories you can book at home, on your schedule.',
                     action: 'All categories',
                     onAction: () => Get.toNamed('/categories'),
                   ),
@@ -58,7 +61,8 @@ class _HomePageState extends State<HomePage> {
                   else if (catalog.homeServices.isEmpty)
                     EmptyState(
                       title: 'Catalog coming soon',
-                      message: 'Services will appear here once the admin publishes them.',
+                      message:
+                          'Services will appear here once the admin publishes them.',
                     )
                   else
                     ServiceGrid(services: catalog.homeServices),
@@ -72,7 +76,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                     _HScroll(
                       empty: 'No live offers right now.',
-                      children: catalog.offers.map((o) => OfferCard(offer: o)).toList(),
+                      children: catalog.offers
+                          .map((o) => OfferCard(offer: o))
+                          .toList(),
                     ),
                   ],
                   const SizedBox(height: 64),
@@ -84,7 +90,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                   _HScroll(
                     empty: 'Packages will appear here.',
-                    children: catalog.packages.map((p) => PackageCard(pack: p)).toList(),
+                    children: catalog.packages
+                        .map((p) => PackageCard(pack: p))
+                        .toList(),
                   ),
                   const SizedBox(height: 72),
                   const _Why(),
@@ -97,7 +105,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                   _HScroll(
                     empty: 'Reviews will appear after completed bookings.',
-                    children: catalog.reviews.map((r) => ReviewCard(review: r)).toList(),
+                    children: catalog.reviews
+                        .map((r) => ReviewCard(review: r))
+                        .toList(),
                   ),
                   const SizedBox(height: 72),
                   const _Cta(),
@@ -148,9 +158,15 @@ class _Hero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('AT-HOME BEAUTY', style: AppTextStyles.caption.copyWith(color: AppColors.gold)),
+          Text(
+            'AT-HOME BEAUTY',
+            style: AppTextStyles.caption.copyWith(color: AppColors.gold),
+          ),
           const SizedBox(height: 12),
-          Text('The salon experience,\nquietly brought home.', style: desktop ? AppTextStyles.display : AppTextStyles.h1),
+          Text(
+            'The salon experience,\nquietly brought home.',
+            style: desktop ? AppTextStyles.display : AppTextStyles.h1,
+          ),
           const SizedBox(height: 16),
           Text(
             'Facials, waxing, hair spa, bridal prep and more — booked around your day, in your space.',
@@ -161,8 +177,14 @@ class _Hero extends StatelessWidget {
             spacing: 12,
             runSpacing: 12,
             children: [
-              PrimaryButton(label: 'Explore Services', onTap: () => Get.toNamed('/categories')),
-              SecondaryButton(label: 'Request now', onTap: () => Get.toNamed('/categories')),
+              PrimaryButton(
+                label: 'Explore Services',
+                onTap: () => Get.toNamed('/categories'),
+              ),
+              SecondaryButton(
+                label: 'Request now',
+                onTap: () => Get.toNamed('/categories'),
+              ),
             ],
           ),
         ],
@@ -173,25 +195,48 @@ class _Hero extends StatelessWidget {
 
 class HeroImage extends StatelessWidget {
   const HeroImage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FadeInUp(
       delayMs: 80,
-      child: const CloudinaryImage(
-        url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1400&q=80',
-        height: 420,
-        width: double.infinity,
+      child: Container(
+        // color: Colors.white,
+        child: Image.asset(
+          'assets/images/banner.png', // Apni asset file ka path yahan dalein
+          height: 420,
+          width: double.infinity,
+          fit: BoxFit.fitWidth, // Banner ko clean fit karne ke liye
+        ),
       ),
     );
   }
 }
+
+// class HeroImage extends StatelessWidget {
+//   const HeroImage({super.key});
+//   @override
+//   Widget build(BuildContext context) {
+//     return FadeInUp(
+//       delayMs: 80,
+//       child: const CloudinaryImage(
+//         url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1400&q=80',
+//         height: 420,
+//         width: double.infinity,
+//       ),
+//     );
+//   }
+// }
 
 class _CategoryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cats = Get.find<CatalogController>().categories;
     if (cats.isEmpty) {
-      return const EmptyState(title: 'No categories yet', message: 'Ask an admin to publish the catalog.');
+      return const EmptyState(
+        title: 'No categories yet',
+        message: 'Ask an admin to publish the catalog.',
+      );
     }
     final isMobile = Breakpoints.isMobile(context);
     final count = Breakpoints.gridCount(context, max: 5);
@@ -217,7 +262,10 @@ class _HScroll extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (children.isEmpty) {
-      return Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Text(empty));
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(empty),
+      );
     }
     return SizedBox(
       height: 360,
@@ -237,16 +285,39 @@ class _Why extends StatelessWidget {
   Widget build(BuildContext context) {
     const items = [
       (Icons.home_outlined, 'At-home service', 'No travel. No waiting rooms.'),
-      (Icons.verified_outlined, 'Verified professionals', 'Trained specialists you can trust.'),
-      (Icons.payments_outlined, 'Transparent pricing', 'MRP, offer price and duration, clearly shown.'),
-      (Icons.chat_outlined, 'WhatsApp request', 'Send selected services, date and time in one message.'),
-      (Icons.spa_outlined, 'Premium products', 'Thoughtful formulas for skin and hair.'),
-      (Icons.schedule_outlined, 'Convenient hours', 'Slots that fit around your day.'),
+      (
+        Icons.verified_outlined,
+        'Verified professionals',
+        'Trained specialists you can trust.',
+      ),
+      (
+        Icons.payments_outlined,
+        'Transparent pricing',
+        'MRP, offer price and duration, clearly shown.',
+      ),
+      (
+        Icons.chat_outlined,
+        'WhatsApp request',
+        'Send selected services, date and time in one message.',
+      ),
+      (
+        Icons.spa_outlined,
+        'Premium products',
+        'Thoughtful formulas for skin and hair.',
+      ),
+      (
+        Icons.schedule_outlined,
+        'Convenient hours',
+        'Slots that fit around your day.',
+      ),
     ];
     final count = Breakpoints.gridCount(context, max: 3);
     return Column(
       children: [
-        const SectionHeader(eyebrow: 'Why Tamanna', title: 'Care that comes to you'),
+        const SectionHeader(
+          eyebrow: 'Why Tamanna',
+          title: 'Care that comes to you',
+        ),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -290,11 +361,17 @@ class _Cta extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 28),
-      decoration: BoxDecoration(color: AppColors.ink, borderRadius: BorderRadius.circular(28)),
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(28),
+      ),
       child: Column(
         children: [
-          Text('Bring the salon experience home.',
-              style: AppTextStyles.h2.copyWith(color: Colors.white), textAlign: TextAlign.center),
+          Text(
+            'Bring the salon experience home.',
+            style: AppTextStyles.h2.copyWith(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 16),
           PrimaryButton(
             label: 'Request a Service',

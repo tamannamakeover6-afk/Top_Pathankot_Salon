@@ -33,7 +33,7 @@ class CloudinaryImage extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(color: AppColors.cream, borderRadius: r),
-        child: const Icon(Icons.spa_outlined, color: AppColors.rose),
+        child: Image.asset("assets/images/empty_photo.png",fit: BoxFit.cover),
       );
     }
 
@@ -66,7 +66,7 @@ class CloudinaryImage extends StatelessWidget {
             width: width,
             height: height,
             color: AppColors.cream,
-            child: const Icon(Icons.image_not_supported_outlined),
+            child: Image.asset("assets/images/empty_photo.png",fit: BoxFit.cover)
           ),
         ),
       ),

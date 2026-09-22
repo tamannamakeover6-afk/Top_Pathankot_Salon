@@ -22,7 +22,9 @@ void goSiteBack(BuildContext context) {
     nav.pop();
     return;
   }
-  if (Get.previousRoute.isNotEmpty && Get.previousRoute != Get.currentRoute && !isSiteHomeRoute(Get.previousRoute)) {
+  if (Get.previousRoute.isNotEmpty &&
+      Get.previousRoute != Get.currentRoute &&
+      !isSiteHomeRoute(Get.previousRoute)) {
     Get.back();
     return;
   }
@@ -64,7 +66,9 @@ class TamannaHeader extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       decoration: BoxDecoration(
-        color: solid ? AppColors.surface.withValues(alpha: 0.96) : Colors.transparent,
+        color: solid
+            ? AppColors.surface.withValues(alpha: 0.96)
+            : Colors.transparent,
         boxShadow: solid ? AppShadows.header : [],
       ),
       child: SafeArea(
@@ -77,12 +81,13 @@ class TamannaHeader extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () => Get.toNamed('/'),
-                  child: Row(
-                    children: [
-                      Image.asset('assets/images/logo.png', height: 42),
-                      const SizedBox(width: 10),
-                      Text(AppConstants.appName, style: AppTextStyles.h3.copyWith(fontSize: 22)),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Image.asset(
+                      'assets/images/logo500.png',
+                      // height: 60,
+                      // width: 170,
+                    ),
                   ),
                 ),
                 const Spacer(),
@@ -98,9 +103,15 @@ class TamannaHeader extends StatelessWidget {
                   ),
                   _Account(),
                   const SizedBox(width: 8),
-                  PrimaryButton(label: 'Request a Service', onTap: () => Get.toNamed('/categories')),
+                  PrimaryButton(
+                    label: 'Request a Service',
+                    onTap: () => Get.toNamed('/categories'),
+                  ),
                 ] else ...[
-                  IconButton(onPressed: () => Get.toNamed('/search'), icon: const Icon(Icons.search)),
+                  IconButton(
+                    onPressed: () => Get.toNamed('/search'),
+                    icon: const Icon(Icons.search),
+                  ),
                   _Account(),
                   IconButton(
                     onPressed: () => _openMenu(context),
@@ -126,14 +137,36 @@ class TamannaHeader extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(title: const Text('Home'), onTap: () => Get.toNamed('/')),
-            ListTile(title: const Text('Categories'), onTap: () => Get.toNamed('/categories')),
-            ListTile(title: const Text('Packages'), onTap: () => Get.toNamed('/packages')),
-            ListTile(title: const Text('Offers'), onTap: () => Get.toNamed('/offers')),
-            ListTile(title: const Text('Reviews'), onTap: () => Get.toNamed('/reviews')),
-            ListTile(title: const Text('About'), onTap: () => Get.toNamed('/about')),
-            ListTile(title: const Text('Contact'), onTap: () => Get.toNamed('/contact')),
+            ListTile(
+              title: const Text('Categories'),
+              onTap: () => Get.toNamed('/categories'),
+            ),
+            ListTile(
+              title: const Text('Packages'),
+              onTap: () => Get.toNamed('/packages'),
+            ),
+            ListTile(
+              title: const Text('Offers'),
+              onTap: () => Get.toNamed('/offers'),
+            ),
+            ListTile(
+              title: const Text('Reviews'),
+              onTap: () => Get.toNamed('/reviews'),
+            ),
+            ListTile(
+              title: const Text('About'),
+              onTap: () => Get.toNamed('/about'),
+            ),
+            ListTile(
+              title: const Text('Contact'),
+              onTap: () => Get.toNamed('/contact'),
+            ),
             const SizedBox(height: 8),
-            PrimaryButton(label: 'Request a Service', expand: true, onTap: () => Get.toNamed('/categories')),
+            PrimaryButton(
+              label: 'Request a Service',
+              expand: true,
+              onTap: () => Get.toNamed('/categories'),
+            ),
           ],
         ),
       ),
@@ -174,14 +207,14 @@ class _Account extends StatelessWidget {
         },
         itemBuilder: (_) => [
           const PopupMenuItem(value: 'profile', child: Text('Profile')),
-          if (auth.isAdmin) const PopupMenuItem(value: 'admin', child: Text('Admin')),
+          if (auth.isAdmin)
+            const PopupMenuItem(value: 'admin', child: Text('Admin')),
           const PopupMenuItem(value: 'logout', child: Text('Logout')),
         ],
       );
     });
   }
 }
-
 
 class SiteShell extends StatelessWidget {
   final Widget child;
