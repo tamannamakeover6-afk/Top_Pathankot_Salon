@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tamanna/core/responsive/breakpoints.dart';
 import 'package:tamanna/core/theme/app_text_styles.dart';
 import 'package:tamanna/core/utils/error_handler.dart';
 import 'package:tamanna/core/widgets/cards.dart';
@@ -13,6 +14,7 @@ class OffersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final catalog = Get.find<CatalogController>();
+    final isMobile = Breakpoints.isMobile(context);
     return SiteShell(
       child: ResponsiveContainer(
         child: Padding(
@@ -40,18 +42,13 @@ class OffersPage extends StatelessWidget {
                     LayoutBuilder(
                       builder: (context, constraints) {
                         final width = constraints.maxWidth;
-                        final columns = width < 640
-                            ? 1
-                            : width < 980
-                                ? 2
-                                : 3;
-                        const gap = 16.0;
+                        final columns = Breakpoints.gridCount(context);
+                        final gap = isMobile ? 12.0 : 20.0;
                         final itemWidth = (width - gap * (columns - 1)) / columns;
                         return Wrap(
                           spacing: gap,
-                          runSpacing: gap,
+                          runSpacing: isMobile ? 16 : 24,
                           alignment: WrapAlignment.start,
-                          crossAxisAlignment: WrapCrossAlignment.start,
                           children: offers
                               .map(
                                 (o) => SizedBox(
@@ -62,44 +59,6 @@ class OffersPage extends StatelessWidget {
                               .toList(),
                         );
                       },
-                    ),
-                  const SizedBox(height: 40),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ReviewsPage extends StatelessWidget {
-  const ReviewsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final catalog = Get.find<CatalogController>();
-    return SiteShell(
-      child: ResponsiveContainer(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 36),
-          child: FutureBuilder(
-            future: catalog.allReviews(),
-            builder: (context, snap) {
-              final reviews = snap.data ?? [];
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Guest reviews', style: AppTextStyles.h1),
-                  const SizedBox(height: 24),
-                  if (reviews.isEmpty)
-                    const EmptyState(title: 'No reviews yet', message: 'Reviews appear after completed bookings are approved.')
-                  else
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: reviews.map((r) => ReviewCard(review: r)).toList(),
                     ),
                   const SizedBox(height: 40),
                 ],

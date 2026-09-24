@@ -165,7 +165,7 @@ class RequestController extends GetxController {
 
   String get message {
     final buffer = StringBuffer();
-    buffer.writeln('Hello Tamanna, I would like to book a home beauty service.');
+    buffer.writeln('Hello Tamanna, I would like to book a home beauty service in Pathankot.');
     buffer.writeln();
     buffer.writeln('Selected:');
     for (final item in items) {

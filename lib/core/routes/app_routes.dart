@@ -7,11 +7,9 @@ class AppRoutes {
   static const packageDetail = '/packages/:packageSlug';
   static const offers = '/offers';
   static const search = '/search';
-  static const reviews = '/reviews';
   static const request = '/request';
   static const booking = '/booking';
   static const login = '/login';
-  static const signup = '/signup';
   static const profile = '/profile';
   static const myBookings = '/bookings';
   static const bookingDetail = '/bookings/:id';
@@ -28,5 +26,4 @@ class AppRoutes {
   static const adminPackages = '/admin/packages';
   static const adminPricing = '/admin/pricing';
   static const adminOffers = '/admin/offers';
-  static const adminReviews = '/admin/reviews';
 }

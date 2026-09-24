@@ -66,7 +66,6 @@ class TamannaFooter extends StatelessWidget {
               _LinkData('All Categories', AppRoutes.categories),
               _LinkData('Bridal & Packages', AppRoutes.packages),
               _LinkData('Special Offers', AppRoutes.offers),
-              _LinkData('Customer Reviews', AppRoutes.reviews),
               _LinkData('Book Service', AppRoutes.booking),
             ],
           ),
@@ -115,7 +114,6 @@ class TamannaFooter extends StatelessWidget {
                   _LinkData('Categories', AppRoutes.categories),
                   _LinkData('Packages', AppRoutes.packages),
                   _LinkData('Offers', AppRoutes.offers),
-                  _LinkData('Reviews', AppRoutes.reviews),
                   _LinkData('Book Now', AppRoutes.booking),
                 ],
               ),
@@ -166,7 +164,7 @@ class _TrustPerksBar extends StatelessWidget {
       _PerkItem(
         icon: Icons.home_repair_service_outlined,
         title: 'Salon At Your Doorstep',
-        subtitle: 'Luxury care in your personal comfort',
+        subtitle: 'At-home beauty across Pathankot 145001',
       ),
       _PerkItem(
         icon: Icons.payments_outlined,
@@ -339,6 +337,17 @@ class _BrandColumn extends StatelessWidget {
                 'https://wa.me/${AppConstants.whatsapp}?text=${Uri.encodeComponent(AppConstants.supportMessage)}',
               )),
             ),
+            _FooterActionButton(
+              icon: Icons.camera_alt_outlined,
+              label: 'Instagram',
+              color: const Color(0xFF261D1A),
+              textColor: Colors.white,
+              borderColor: const Color(0xFF3F302A),
+              onTap: () => launchUrl(
+                Uri.parse(AppConstants.instagram),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
           ],
         ),
       ],
@@ -491,8 +500,18 @@ class _ContactHoursColumn extends StatelessWidget {
         const SizedBox(height: 12),
         _contactRow(
           icon: Icons.location_on_outlined,
-          title: 'Coverage',
-          value: 'Doorstep service in all city zones',
+          title: 'Service Area',
+          value: AppConstants.serviceArea,
+        ),
+        const SizedBox(height: 12),
+        _contactRow(
+          icon: Icons.camera_alt_outlined,
+          title: 'Instagram',
+          value: '@tama.nnabeautysalon',
+          onTap: () => launchUrl(
+            Uri.parse(AppConstants.instagram),
+            mode: LaunchMode.externalApplication,
+          ),
         ),
       ],
     );

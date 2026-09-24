@@ -227,7 +227,6 @@ class _SortDropdown extends StatelessWidget {
                 DropdownMenuItem(value: 'newest', child: Text('Newest')),
                 DropdownMenuItem(value: 'price_asc', child: Text('Price: Low to High')),
                 DropdownMenuItem(value: 'price_desc', child: Text('Price: High to Low')),
-                DropdownMenuItem(value: 'rating', child: Text('Highest Rated')),
               ],
               onChanged: (v) {
                 if (v != null) {

@@ -10,7 +10,6 @@ import 'package:tamanna/core/widgets/ui_kit.dart';
 import 'package:tamanna/data/models/category_model.dart';
 import 'package:tamanna/data/models/offer_model.dart';
 import 'package:tamanna/data/models/package_model.dart';
-import 'package:tamanna/data/models/review_model.dart';
 import 'package:tamanna/data/models/service_model.dart';
 import 'package:tamanna/data/services/cloudinary_service.dart';
 import 'package:tamanna/features/request/request_controller.dart';
@@ -145,8 +144,6 @@ class _ServiceCardState extends State<ServiceCard> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          RatingWidget(rating: s.rating, count: s.reviewCount),
-                          const Spacer(),
                           const Icon(Icons.schedule, size: 16, color: AppColors.textHint),
                           const SizedBox(width: 4),
                           Text('${s.durationMinutes} minutes', style: AppTextStyles.caption),
@@ -365,51 +362,133 @@ class _ServiceCardState extends State<ServiceCard> {
   }
 }
 
-class PackageCard extends StatelessWidget {
+class PackageCard extends StatefulWidget {
   final PackageModel pack;
   final double? width;
   const PackageCard({super.key, required this.pack, this.width});
 
   @override
+  State<PackageCard> createState() => _PackageCardState();
+}
+
+class _PackageCardState extends State<PackageCard> {
+  bool hover = false;
+
+  @override
   Widget build(BuildContext context) {
+    final pack = widget.pack;
     final isMobile = Breakpoints.isMobile(context);
-    final cardWidth = width ?? (isMobile ? 260.0 : 320.0);
-    return GestureDetector(
-      onTap: () => Get.toNamed('/packages/${pack.slug}'),
-      child: Container(
+    final cardWidth = widget.width ?? (isMobile ? 160.0 : 220.0);
+    final imgHeight = isMobile ? 120.0 : 160.0;
+    final radius = isMobile ? 12.0 : 18.0;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: SizedBox(
         width: cardWidth,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(isMobile ? 14 : 18),
-          boxShadow: AppShadows.soft,
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CloudinaryImage(
-              url: pack.imageUrl,
-              height: isMobile ? 135 : 170,
-              width: double.infinity,
-              radius: BorderRadius.vertical(top: Radius.circular(isMobile ? 14 : 18)),
-              preset: CloudinaryPreset.banner,
-            ),
-            Padding(
-              padding: EdgeInsets.all(isMobile ? 12 : 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              transform: Matrix4.translationValues(0, hover ? -4 : 0, 0),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(radius),
+                boxShadow: hover ? AppShadows.hover : AppShadows.soft,
+              ),
+              child: Stack(
                 children: [
-                  DiscountBadge(percent: pack.discountPercent),
-                  SizedBox(height: isMobile ? 6 : 8),
-                  Text(pack.name, style: AppTextStyles.title.copyWith(fontSize: isMobile ? 14 : 16)),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${pack.serviceIds.length} services · ${pack.durationMinutes} min',
-                    style: AppTextStyles.small.copyWith(fontSize: isMobile ? 11 : 12),
+                  GestureDetector(
+                    onTap: () => Get.toNamed('/packages/${pack.slug}'),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(radius),
+                      child: AnimatedScale(
+                        scale: hover ? 1.03 : 1.0,
+                        duration: const Duration(milliseconds: 260),
+                        child: CloudinaryImage(
+                          url: pack.imageUrl,
+                          height: imgHeight,
+                          width: double.infinity,
+                          radius: BorderRadius.circular(radius),
+                          preset: CloudinaryPreset.card,
+                        ),
+                      ),
+                    ),
                   ),
-                  SizedBox(height: isMobile ? 6 : 10),
-                  PriceWidget(mrp: pack.mrp, sellingPrice: pack.sellingPrice),
+                  if (pack.discountPercent > 0)
+                    Positioned(
+                      bottom: isMobile ? 6 : 10,
+                      left: isMobile ? 6 : 10,
+                      child: DiscountBadge(percent: pack.discountPercent),
+                    ),
                 ],
               ),
+            ),
+            SizedBox(height: isMobile ? 6 : 10),
+            GestureDetector(
+              onTap: () => Get.toNamed('/packages/${pack.slug}'),
+              child: Text(
+                pack.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.title.copyWith(
+                  fontSize: isMobile ? 12.5 : 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  height: 1.2,
+                ),
+              ),
+            ),
+            SizedBox(height: isMobile ? 3 : 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '₹${pack.sellingPrice.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: isMobile ? 13 : 15,
+                        ),
+                      ),
+                      if (pack.durationMinutes > 0)
+                        TextSpan(
+                          text: ' · ${pack.durationMinutes}m',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w400,
+                            fontSize: isMobile ? 10.5 : 13,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (pack.mrp > pack.sellingPrice) ...[
+                  const SizedBox(height: 1),
+                  Text(
+                    '₹${pack.mrp.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: AppColors.textHint,
+                      fontSize: isMobile ? 10.5 : 12,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 1),
+                  Text(
+                    '${pack.serviceIds.length} services',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: isMobile ? 10.5 : 12,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -418,127 +497,120 @@ class PackageCard extends StatelessWidget {
   }
 }
 
-class OfferCard extends StatelessWidget {
+class OfferCard extends StatefulWidget {
   final OfferModel offer;
   final bool expand;
   const OfferCard({super.key, required this.offer, this.expand = false});
 
   @override
-  Widget build(BuildContext context) {
-    final isMobile = Breakpoints.isMobile(context);
-    return Container(
-      width: expand ? double.infinity : (isMobile ? 270 : 360),
-      decoration: BoxDecoration(
-        color: AppColors.ink,
-        borderRadius: BorderRadius.circular(isMobile ? 14 : 18),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CloudinaryImage(
-            url: offer.bannerUrl,
-            height: isMobile ? 120 : 150,
-            width: double.infinity,
-            radius: BorderRadius.zero,
-            preset: CloudinaryPreset.banner,
-          ),
-          Padding(
-            padding: EdgeInsets.all(isMobile ? 12 : 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  offer.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.title.copyWith(
-                    color: Colors.white,
-                    fontSize: isMobile ? 13.5 : 15,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  offer.discountType == 'fixed'
-                      ? '₹${offer.discountValue.round()} off'
-                      : '${offer.discountValue.round()}% off selected rituals',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.small.copyWith(
-                    color: const Color(0xFFE8D5C8),
-                    fontSize: isMobile ? 11 : 12,
-                  ),
-                ),
-                SizedBox(height: isMobile ? 8 : 12),
-                TextButton(
-                  onPressed: () => Get.toNamed('/categories'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text('Browse', style: TextStyle(fontWeight: FontWeight.w700)),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  State<OfferCard> createState() => _OfferCardState();
 }
 
-class ReviewCard extends StatelessWidget {
-  final ReviewModel review;
-  const ReviewCard({super.key, required this.review});
+class _OfferCardState extends State<OfferCard> {
+  bool hover = false;
+
+  String get _discountLabel {
+    final o = widget.offer;
+    return o.discountType == 'fixed'
+        ? '₹${o.discountValue.round()} off'
+        : '${o.discountValue.round()}% off';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final offer = widget.offer;
     final isMobile = Breakpoints.isMobile(context);
-    return Container(
-      width: isMobile ? 260 : 320,
-      padding: EdgeInsets.all(isMobile ? 14 : 20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(isMobile ? 14 : 18),
-        boxShadow: AppShadows.soft,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: isMobile ? 16 : 20,
-                backgroundColor: AppColors.cream,
-                child: Text(
-                  review.userName.isEmpty ? 'T' : review.userName[0],
-                  style: TextStyle(fontSize: isMobile ? 12 : 14),
-                ),
+    final imgHeight = isMobile ? 120.0 : 160.0;
+    final radius = isMobile ? 12.0 : 18.0;
+    final cardWidth = widget.expand ? double.infinity : (isMobile ? 160.0 : 220.0);
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => hover = true),
+      onExit: (_) => setState(() => hover = false),
+      child: SizedBox(
+        width: cardWidth == double.infinity ? null : cardWidth,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              transform: Matrix4.translationValues(0, hover ? -4 : 0, 0),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(radius),
+                boxShadow: hover ? AppShadows.hover : AppShadows.soft,
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      review.userName,
-                      style: AppTextStyles.title.copyWith(fontSize: isMobile ? 13 : 15),
+              child: Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () => Get.toNamed('/offers'),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(radius),
+                      child: AnimatedScale(
+                        scale: hover ? 1.03 : 1.0,
+                        duration: const Duration(milliseconds: 260),
+                        child: CloudinaryImage(
+                          url: offer.bannerUrl,
+                          height: imgHeight,
+                          width: double.infinity,
+                          radius: BorderRadius.circular(radius),
+                          preset: CloudinaryPreset.card,
+                        ),
+                      ),
                     ),
-                    RatingWidget(rating: review.rating.toDouble()),
-                  ],
+                  ),
+                  Positioned(
+                    bottom: isMobile ? 6 : 10,
+                    left: isMobile ? 6 : 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8590C),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        _discountLabel,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: isMobile ? 10 : 11,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: isMobile ? 6 : 10),
+            GestureDetector(
+              onTap: () => Get.toNamed('/offers'),
+              child: Text(
+                offer.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.title.copyWith(
+                  fontSize: isMobile ? 12.5 : 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  height: 1.2,
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: isMobile ? 8 : 12),
-          Text(review.review, maxLines: 4, overflow: TextOverflow.ellipsis, style: AppTextStyles.body),
-          const SizedBox(height: 10),
-          Text(review.itemName, style: AppTextStyles.caption),
-        ],
+            ),
+            SizedBox(height: isMobile ? 3 : 6),
+            Text(
+              offer.description.isNotEmpty
+                  ? offer.description
+                  : 'Special offer on selected home rituals',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: isMobile ? 11 : 13,
+                height: 1.3,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

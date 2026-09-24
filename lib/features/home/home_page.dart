@@ -96,19 +96,6 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 72),
                   const _Why(),
                   const SizedBox(height: 72),
-                  SectionHeader(
-                    eyebrow: 'Kind words',
-                    title: 'Guest reviews',
-                    action: 'Read more',
-                    onAction: () => Get.toNamed('/reviews'),
-                  ),
-                  _HScroll(
-                    empty: 'Reviews will appear after completed bookings.',
-                    children: catalog.reviews
-                        .map((r) => ReviewCard(review: r))
-                        .toList(),
-                  ),
-                  const SizedBox(height: 72),
                   const _Cta(),
                   const SizedBox(height: 48),
                 ],
@@ -267,7 +254,7 @@ class _HScroll extends StatelessWidget {
       );
     }
     return SizedBox(
-      height: 360,
+      height: Breakpoints.isMobile(context) ? 220 : 260,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemBuilder: (_, i) => children[i],

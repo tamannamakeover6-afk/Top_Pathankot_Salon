@@ -2,10 +2,15 @@ class AppConstants {
   static const String appName = 'Tamanna';
   static const String tagline = 'Beauty & wellness, brought to your home.';
   static const String phone = '+916283497578';
-  static const String whatsapp = '6283497578';
+  /// WhatsApp deep-link number (country code + number, no + or spaces).
+  static const String whatsapp = '916283497578';
   static const String email = 'hello@tamanna.beauty';
+  static const String city = 'Pathankot';
+  static const String pincode = '145001';
+  static const String serviceArea = 'Pathankot, 145001';
+  static const String instagram = 'https://www.instagram.com/tama.nnabeautysalon/';
   static const String supportMessage =
-      'Hello Tamanna, I would like to book a home beauty service.';
+      'Hello Tamanna, I would like to book a home beauty service in Pathankot.';
 
   static const String hiveUserBox = 'user';
   static const String hiveUserListBox = 'userList';

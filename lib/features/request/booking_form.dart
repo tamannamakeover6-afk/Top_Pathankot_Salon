@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:tamanna/core/constants/app_constants.dart';
 import 'package:tamanna/core/theme/app_colors.dart';
 import 'package:tamanna/core/utils/price_utils.dart';
 import 'package:tamanna/features/request/request_controller.dart';
@@ -535,7 +536,7 @@ class _CustomerDetailsSection extends StatelessWidget {
         const SizedBox(height: 8),
         _buildInput(
           controller: request.address,
-          hint: 'House / Flat no., Apartment or Street name, Landmark',
+          hint: 'House / Flat, street, landmark — Pathankot ${AppConstants.pincode}',
           icon: Icons.location_on_outlined,
           maxLines: 2,
         ),

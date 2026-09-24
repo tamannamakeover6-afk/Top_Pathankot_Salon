@@ -148,27 +148,3 @@ class PriceWidget extends StatelessWidget {
     );
   }
 }
-
-class RatingWidget extends StatelessWidget {
-  final double rating;
-  final int count;
-  const RatingWidget({super.key, required this.rating, this.count = 0});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(Icons.star_rounded, size: 16, color: AppColors.gold),
-        const SizedBox(width: 4),
-        Text(
-          rating.toStringAsFixed(1),
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-        ),
-        if (count > 0) ...[
-          const SizedBox(width: 4),
-          Text('($count)', style: const TextStyle(color: AppColors.textHint, fontSize: 12)),
-        ],
-      ],
-    );
-  }
-}

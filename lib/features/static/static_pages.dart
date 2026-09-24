@@ -19,14 +19,16 @@ class AboutPage extends StatelessWidget {
               Text('About Tamanna', style: AppTextStyles.h1),
               const SizedBox(height: 16),
               Text(
-                'Tamanna brings professional beauty and wellness rituals to your home. From facials and waxing to hair spa and bridal prep, every service is designed around comfort, transparency and care.',
+                'Tamanna brings professional beauty and wellness rituals to your home in Pathankot (145001). From facials and waxing to hair spa and bridal prep, every service is designed around comfort, transparency and care.',
                 style: AppTextStyles.body,
               ),
               const SizedBox(height: 16),
               Text(
-                'We are not a walk-in salon chain. We come to you — with verified professionals, clear pricing and a booking flow that respects your time.',
+                'We are not a walk-in salon chain. We come to you across Pathankot — with verified professionals, clear pricing and a booking flow that respects your time.',
                 style: AppTextStyles.body,
               ),
+              const SizedBox(height: 20),
+              Text('Service area: ${AppConstants.serviceArea}', style: AppTextStyles.title),
               const SizedBox(height: 40),
             ],
           ),
@@ -49,7 +51,12 @@ class ContactPage extends StatelessWidget {
             children: [
               Text('Contact', style: AppTextStyles.h1),
               const SizedBox(height: 16),
-              Text('Call or message us to plan a home appointment.', style: AppTextStyles.body),
+              Text(
+                'Call or message us to plan a home appointment in Pathankot (${AppConstants.pincode}).',
+                style: AppTextStyles.body,
+              ),
+              const SizedBox(height: 12),
+              Text('Service area: ${AppConstants.serviceArea}', style: AppTextStyles.small),
               const SizedBox(height: 20),
               PrimaryButton(
                 label: 'Call ${AppConstants.phone}',
@@ -61,6 +68,14 @@ class ContactPage extends StatelessWidget {
                 onTap: () => launchUrl(Uri.parse(
                   'https://wa.me/${AppConstants.whatsapp}?text=${Uri.encodeComponent(AppConstants.supportMessage)}',
                 )),
+              ),
+              const SizedBox(height: 12),
+              SecondaryButton(
+                label: 'Instagram',
+                onTap: () => launchUrl(
+                  Uri.parse(AppConstants.instagram),
+                  mode: LaunchMode.externalApplication,
+                ),
               ),
               const SizedBox(height: 40),
             ],

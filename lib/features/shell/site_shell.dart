@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tamanna/core/constants/app_constants.dart';
 import 'package:tamanna/core/responsive/breakpoints.dart';
 import 'package:tamanna/core/theme/app_colors.dart';
 import 'package:tamanna/core/theme/app_shadows.dart';
@@ -96,7 +95,6 @@ class TamannaHeader extends StatelessWidget {
                   _Nav('Categories', '/categories'),
                   _Nav('Packages', '/packages'),
                   _Nav('Offers', '/offers'),
-                  _Nav('Reviews', '/reviews'),
                   IconButton(
                     onPressed: () => Get.toNamed('/search'),
                     icon: const Icon(Icons.search),
@@ -148,10 +146,6 @@ class TamannaHeader extends StatelessWidget {
             ListTile(
               title: const Text('Offers'),
               onTap: () => Get.toNamed('/offers'),
-            ),
-            ListTile(
-              title: const Text('Reviews'),
-              onTap: () => Get.toNamed('/reviews'),
             ),
             ListTile(
               title: const Text('About'),

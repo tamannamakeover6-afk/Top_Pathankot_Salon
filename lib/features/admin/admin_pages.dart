@@ -18,9 +18,7 @@ import 'package:tamanna/data/models/service_model.dart';
 import 'package:tamanna/data/repositories/category_repository.dart';
 import 'package:tamanna/data/repositories/offer_repository.dart';
 import 'package:tamanna/data/repositories/package_repository.dart';
-import 'package:tamanna/data/repositories/review_repository.dart';
 import 'package:tamanna/data/repositories/service_repository.dart';
-import 'package:tamanna/data/services/parlour_data_seeder.dart';
 import 'package:tamanna/features/admin/admin_shell.dart';
 
 class AdminDashboardPage extends StatelessWidget {
@@ -49,8 +47,6 @@ class AdminDashboardPage extends StatelessWidget {
                       _card('Packages', '${data['packages'] ?? 0}'),
                       if ((data['offers'] ?? 0) > 0)
                         _card('Active offers', '${data['offers'] ?? 0}'),
-                      _card('Reviews', '${data['reviews'] ?? 0}'),
-                      _card('Avg rating', '${data['rating'] ?? 0}'),
                     ],
                   ),
                 ],
@@ -88,21 +84,11 @@ class AdminDashboardPage extends StatelessWidget {
     final services = await db.collection(Collections.services).get();
     final packs = await db.collection(Collections.packages).get();
     final offers = await db.collection(Collections.offers).where('active', isEqualTo: true).get();
-    final reviews = await db.collection(Collections.reviews).get();
-    double avg = 0;
-    if (reviews.docs.isNotEmpty) {
-      avg = reviews.docs
-              .map((d) => PriceUtils.toDouble(d.data()['rating']))
-              .fold<double>(0, (a, b) => a + b) /
-          reviews.docs.length;
-    }
     return {
       'categories': cats.size,
       'services': services.size,
       'packages': packs.size,
       'offers': offers.size,
-      'reviews': reviews.size,
-      'rating': avg.toStringAsFixed(1),
     };
   }
 }
@@ -333,45 +319,6 @@ class AdminOffersPage extends StatelessWidget {
                       onActiveChanged: (v) => _setActive(() => repo.setActive(o.id, v)),
                       onEdit: () => _offerForm(context, existing: o),
                       onDelete: () => _confirmDelete(context, () => repo.delete(o.id)),
-                    ),
-                  ),
-                )
-                .toList(),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class AdminReviewsPage extends StatelessWidget {
-  const AdminReviewsPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    final repo = ReviewRepository();
-    return AdminShell(
-      title: 'Reviews',
-      child: StreamBuilder(
-        stream: repo.watchAll(),
-        builder: (context, snap) {
-          final items = snap.data ?? [];
-          return ListView(
-            padding: const EdgeInsets.all(20),
-            children: items
-                .map(
-                  (r) => ListTile(
-                    title: Text('${r.userName} · ${r.rating}★'),
-                    subtitle: Text('${r.itemName}\n${r.review}'),
-                    isThreeLine: true,
-                    trailing: Wrap(
-                      children: [
-                        IconButton(icon: const Icon(Icons.check), onPressed: () => repo.setStatus(r.id, 'approved')),
-                        IconButton(icon: const Icon(Icons.visibility_off), onPressed: () => repo.setStatus(r.id, 'hidden')),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _confirmDelete(context, () => repo.delete(r.id)),
-                        ),
-                      ],
                     ),
                   ),
                 )

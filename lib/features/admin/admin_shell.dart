@@ -87,7 +87,6 @@ class _Side extends StatelessWidget {
           _item('Packages', '/admin/packages'),
           _item('Pricing', '/admin/pricing'),
           _item('Offers', '/admin/offers'),
-          _item('Reviews', '/admin/reviews'),
         ],
       ),
     );

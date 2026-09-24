@@ -60,12 +60,12 @@ class _PackagesPageState extends State<PackagesPage> {
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final width = constraints.maxWidth;
-                      final columns = width < 640 ? 1 : width < 980 ? 2 : 3;
-                      final gap = isMobile ? 12.0 : 16.0;
+                      final columns = Breakpoints.gridCount(context);
+                      final gap = isMobile ? 12.0 : 20.0;
                       final itemWidth = (width - gap * (columns - 1)) / columns;
                       return Wrap(
                         spacing: gap,
-                        runSpacing: gap,
+                        runSpacing: isMobile ? 16 : 24,
                         alignment: WrapAlignment.start,
                         children: packs.map((p) => PackageCard(pack: p, width: itemWidth)).toList(),
                       );

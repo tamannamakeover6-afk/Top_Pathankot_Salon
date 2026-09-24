@@ -22,11 +22,9 @@ class AppPages {
     GetPage(name: AppRoutes.packageDetail, page: () => const PackageDetailPage()),
     GetPage(name: AppRoutes.offers, page: () => const OffersPage()),
     GetPage(name: AppRoutes.search, page: () => const SearchPage()),
-    GetPage(name: AppRoutes.reviews, page: () => const ReviewsPage()),
     GetPage(name: AppRoutes.request, page: () => const RequestPage()),
     GetPage(name: AppRoutes.booking, page: () => const RequestPage()),
     GetPage(name: AppRoutes.login, page: () => const LoginPage()),
-    GetPage(name: AppRoutes.signup, page: () => const SignupPage()),
     GetPage(name: AppRoutes.profile, page: () => const ProfilePage()),
     GetPage(name: AppRoutes.about, page: () => const AboutPage()),
     GetPage(name: AppRoutes.contact, page: () => const ContactPage()),
@@ -43,6 +41,5 @@ class AppPages {
     GetPage(name: AppRoutes.adminPackages, page: () => const AdminPackagesPage(), middlewares: [AdminGuard()]),
     GetPage(name: AppRoutes.adminPricing, page: () => const AdminPricingPage(), middlewares: [AdminGuard()]),
     GetPage(name: AppRoutes.adminOffers, page: () => const AdminOffersPage(), middlewares: [AdminGuard()]),
-    GetPage(name: AppRoutes.adminReviews, page: () => const AdminReviewsPage(), middlewares: [AdminGuard()]),
   ];
 }

@@ -6,9 +6,7 @@ import 'package:tamanna/core/utils/error_handler.dart';
 import 'package:tamanna/core/widgets/cards.dart';
 import 'package:tamanna/core/widgets/media_kit.dart';
 import 'package:tamanna/core/widgets/ui_kit.dart';
-import 'package:tamanna/data/models/review_model.dart';
 import 'package:tamanna/data/models/service_model.dart';
-import 'package:tamanna/data/repositories/review_repository.dart';
 import 'package:tamanna/data/repositories/service_repository.dart';
 import 'package:tamanna/features/request/booking_form.dart';
 import 'package:tamanna/features/request/request_controller.dart';
@@ -22,7 +20,6 @@ class ServiceDetailPage extends StatefulWidget {
 
 class _ServiceDetailPageState extends State<ServiceDetailPage> {
   ServiceModel? service;
-  List<ReviewModel> reviews = [];
   List<ServiceModel> related = [];
   String? error;
   bool loading = true;
@@ -52,15 +49,11 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
         });
         return;
       }
-      final more = await Future.wait([
-        ReviewRepository().fetchApproved(serviceId: item.id),
-        ServiceRepository().related(categoryId: item.categoryId, excludeId: item.id),
-      ]);
+      final relatedItems = await ServiceRepository().related(categoryId: item.categoryId, excludeId: item.id);
       setState(() {
         service = item;
         gallery = item.imageUrl;
-        reviews = more[0] as List<ReviewModel>;
-        related = more[1] as List<ServiceModel>;
+        related = relatedItems;
         loading = false;
       });
       final request = Get.find<RequestController>();
@@ -167,30 +160,25 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
           ),
         ),
         SizedBox(height: isMobile ? 6 : 8),
-        Row(
-          children: [
-            RatingWidget(rating: s.rating, count: s.reviewCount),
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3ECE6),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.timer_outlined, size: 12, color: Color(0xFF6E5E58)),
-                  const SizedBox(width: 3),
-                  Text(
-                    '${s.durationMinutes} min',
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6E5E58)),
-                  ),
-                ],
-              ),
+        if (s.durationMinutes > 0)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3ECE6),
+              borderRadius: BorderRadius.circular(5),
             ),
-          ],
-        ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.timer_outlined, size: 12, color: Color(0xFF6E5E58)),
+                const SizedBox(width: 3),
+                Text(
+                  '${s.durationMinutes} min',
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6E5E58)),
+                ),
+              ],
+            ),
+          ),
         SizedBox(height: isMobile ? 10 : 16),
         Row(
           children: [
@@ -348,24 +336,6 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                               )),
                           SizedBox(height: isMobile ? 16 : 24),
                         ],
-                        Text(
-                          'Guest reviews',
-                          style: TextStyle(
-                            fontSize: isMobile ? 16 : 20,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        if (reviews.isEmpty)
-                          const Text('No approved reviews yet.', style: TextStyle(fontSize: 13, color: AppColors.textHint))
-                        else
-                          Wrap(
-                            spacing: isMobile ? 10 : 16,
-                            runSpacing: isMobile ? 10 : 16,
-                            children: reviews.map((r) => ReviewCard(review: r)).toList(),
-                          ),
-                        SizedBox(height: isMobile ? 24 : 32),
                         if (related.isNotEmpty) ...[
                           const SectionHeader(title: 'You may also like'),
                           ServiceGrid(services: related),
