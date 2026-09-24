@@ -21,14 +21,14 @@ The built website is in the `docs/` folder.
    - Branch: **main**
    - Folder: **/docs**
 3. Save, wait 1–2 minutes
-4. Open: **https://tamannamakeover6-afk.github.io/tamanna_makeover/**
+4. Open: **https://tamannamakeover6-afk.github.io/Top_Pathankot_Salon/**
 
 Do **not** use the repo root as Pages source — that only shows the README.
 
 ### Rebuild after code changes
 
 ```bash
-flutter build web --release --base-href "/tamanna_makeover/"
+flutter build web --release --base-href "/Top_Pathankot_Salon/"
 rm -rf docs && mkdir docs && cp -R build/web/. docs/ && touch docs/.nojekyll && cp docs/index.html docs/404.html
 git add docs && git commit -m "Update live site build" && git push
 ```
