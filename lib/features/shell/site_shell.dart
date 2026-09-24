@@ -62,6 +62,7 @@ class TamannaHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final desktop = Breakpoints.isDesktop(context);
+    final isMobile = Breakpoints.isMobile(context);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       decoration: BoxDecoration(
@@ -73,19 +74,19 @@ class TamannaHeader extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: ResponsiveContainer(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16),
           child: SizedBox(
-            height: 76,
+            height: isMobile ? 58 : 76,
             child: Row(
               children: [
                 InkWell(
                   onTap: () => Get.toNamed('/'),
                   child: Padding(
-                    padding: const EdgeInsets.all(5.0),
+                    padding: EdgeInsets.all(isMobile ? 2.0 : 5.0),
                     child: Image.asset(
                       'assets/images/logo500.png',
-                      // height: 60,
-                      // width: 170,
+                      height: isMobile ? 36 : 48,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),

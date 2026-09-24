@@ -28,8 +28,8 @@ class _CategoryCardState extends State<CategoryCard> {
   Widget build(BuildContext context) {
     final c = widget.category;
     final isMobile = Breakpoints.isMobile(context);
-    final imgHeight = isMobile ? 115.0 : 160.0;
-    final radius = isMobile ? 12.0 : 18.0;
+    final imgHeight = isMobile ? 95.0 : 160.0;
+    final radius = isMobile ? 10.0 : 18.0;
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
       onExit: (_) => setState(() => hover = false),
@@ -58,21 +58,21 @@ class _CategoryCardState extends State<CategoryCard> {
               ),
             ),
             // Details outside the box
-            SizedBox(height: isMobile ? 6 : 10),
+            SizedBox(height: isMobile ? 5 : 10),
             Text(
               c.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.title.copyWith(
-                fontSize: isMobile ? 13 : 15,
+                fontSize: isMobile ? 12.5 : 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 1),
             Text(
               c.serviceCount > 0 ? '${c.serviceCount} services' : 'Explore',
               style: AppTextStyles.small.copyWith(
-                fontSize: isMobile ? 11 : 12,
+                fontSize: isMobile ? 10.5 : 12,
                 color: AppColors.textSecondary,
               ),
             ),
@@ -236,8 +236,8 @@ class _ServiceCardState extends State<ServiceCard> {
   Widget build(BuildContext context) {
     final s = widget.service;
     final isMobile = Breakpoints.isMobile(context);
-    final imgHeight = isMobile ? 120.0 : 190.0;
-    final radius = isMobile ? 12.0 : 18.0;
+    final imgHeight = isMobile ? 110.0 : 190.0;
+    final radius = isMobile ? 10.0 : 18.0;
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
       onExit: (_) => setState(() => hover = false),
@@ -274,8 +274,8 @@ class _ServiceCardState extends State<ServiceCard> {
                 ),
                 // Top-Left Quick Preview Eye Icon (Orange/Accent circular badge)
                 Positioned(
-                  top: isMobile ? 6 : 10,
-                  left: isMobile ? 6 : 10,
+                  top: isMobile ? 5 : 10,
+                  left: isMobile ? 5 : 10,
                   child: Material(
                     color: const Color(0xFFE8590C), // Vibrant beauty accent orange
                     shape: const CircleBorder(),
@@ -284,16 +284,16 @@ class _ServiceCardState extends State<ServiceCard> {
                       customBorder: const CircleBorder(),
                       onTap: () => _openQuickPreview(context, s),
                       child: Padding(
-                        padding: EdgeInsets.all(isMobile ? 5 : 7),
-                        child: Icon(Icons.remove_red_eye_outlined, size: isMobile ? 13 : 16, color: Colors.white),
+                        padding: EdgeInsets.all(isMobile ? 4.5 : 7),
+                        child: Icon(Icons.remove_red_eye_outlined, size: isMobile ? 12 : 16, color: Colors.white),
                       ),
                     ),
                   ),
                 ),
                 if (s.discountPercent > 0)
                   Positioned(
-                    bottom: isMobile ? 6 : 10,
-                    left: isMobile ? 6 : 10,
+                    bottom: isMobile ? 5 : 10,
+                    left: isMobile ? 5 : 10,
                     child: DiscountBadge(percent: s.discountPercent),
                   ),
               ],
@@ -301,7 +301,7 @@ class _ServiceCardState extends State<ServiceCard> {
           ),
 
           // 2. Details OUTSIDE the box, sitting directly on the page surface
-          SizedBox(height: isMobile ? 6 : 10),
+          SizedBox(height: isMobile ? 5 : 10),
           GestureDetector(
             onTap: () => Get.toNamed('/services/${s.slug}'),
             child: Text(
@@ -309,14 +309,14 @@ class _ServiceCardState extends State<ServiceCard> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.title.copyWith(
-                fontSize: isMobile ? 12.5 : 15,
+                fontSize: isMobile ? 12 : 15,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
                 height: 1.2,
               ),
             ),
           ),
-          SizedBox(height: isMobile ? 3 : 6),
+          SizedBox(height: isMobile ? 2 : 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -328,7 +328,7 @@ class _ServiceCardState extends State<ServiceCard> {
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w700,
-                        fontSize: isMobile ? 13 : 15,
+                        fontSize: isMobile ? 12.5 : 15,
                       ),
                     ),
                     if (s.durationMinutes > 0)
@@ -337,7 +337,7 @@ class _ServiceCardState extends State<ServiceCard> {
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w400,
-                          fontSize: isMobile ? 10.5 : 13,
+                          fontSize: isMobile ? 10 : 13,
                         ),
                       ),
                   ],
@@ -349,7 +349,7 @@ class _ServiceCardState extends State<ServiceCard> {
                   '₹${s.mrp.toStringAsFixed(2)}',
                   style: TextStyle(
                     color: AppColors.textHint,
-                    fontSize: isMobile ? 10.5 : 12,
+                    fontSize: isMobile ? 10 : 12,
                     decoration: TextDecoration.lineThrough,
                   ),
                 ),
@@ -378,9 +378,9 @@ class _PackageCardState extends State<PackageCard> {
   Widget build(BuildContext context) {
     final pack = widget.pack;
     final isMobile = Breakpoints.isMobile(context);
-    final cardWidth = widget.width ?? (isMobile ? 160.0 : 220.0);
-    final imgHeight = isMobile ? 120.0 : 160.0;
-    final radius = isMobile ? 12.0 : 18.0;
+    final cardWidth = widget.width ?? (isMobile ? 140.0 : 220.0);
+    final imgHeight = isMobile ? 105.0 : 160.0;
+    final radius = isMobile ? 10.0 : 18.0;
 
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
@@ -419,14 +419,14 @@ class _PackageCardState extends State<PackageCard> {
                   ),
                   if (pack.discountPercent > 0)
                     Positioned(
-                      bottom: isMobile ? 6 : 10,
-                      left: isMobile ? 6 : 10,
+                      bottom: isMobile ? 5 : 10,
+                      left: isMobile ? 5 : 10,
                       child: DiscountBadge(percent: pack.discountPercent),
                     ),
                 ],
               ),
             ),
-            SizedBox(height: isMobile ? 6 : 10),
+            SizedBox(height: isMobile ? 5 : 10),
             GestureDetector(
               onTap: () => Get.toNamed('/packages/${pack.slug}'),
               child: Text(
@@ -434,14 +434,14 @@ class _PackageCardState extends State<PackageCard> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.title.copyWith(
-                  fontSize: isMobile ? 12.5 : 15,
+                  fontSize: isMobile ? 12 : 15,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                   height: 1.2,
                 ),
               ),
             ),
-            SizedBox(height: isMobile ? 3 : 6),
+            SizedBox(height: isMobile ? 2 : 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -453,7 +453,7 @@ class _PackageCardState extends State<PackageCard> {
                         style: TextStyle(
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.w700,
-                          fontSize: isMobile ? 13 : 15,
+                          fontSize: isMobile ? 12.5 : 15,
                         ),
                       ),
                       if (pack.durationMinutes > 0)
@@ -462,7 +462,7 @@ class _PackageCardState extends State<PackageCard> {
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontWeight: FontWeight.w400,
-                            fontSize: isMobile ? 10.5 : 13,
+                            fontSize: isMobile ? 10 : 13,
                           ),
                         ),
                     ],
@@ -474,7 +474,7 @@ class _PackageCardState extends State<PackageCard> {
                     '₹${pack.mrp.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: AppColors.textHint,
-                      fontSize: isMobile ? 10.5 : 12,
+                      fontSize: isMobile ? 10 : 12,
                       decoration: TextDecoration.lineThrough,
                     ),
                   ),
@@ -484,7 +484,7 @@ class _PackageCardState extends State<PackageCard> {
                     '${pack.serviceIds.length} services',
                     style: TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: isMobile ? 10.5 : 12,
+                      fontSize: isMobile ? 10 : 12,
                     ),
                   ),
                 ],
@@ -520,9 +520,9 @@ class _OfferCardState extends State<OfferCard> {
   Widget build(BuildContext context) {
     final offer = widget.offer;
     final isMobile = Breakpoints.isMobile(context);
-    final imgHeight = isMobile ? 120.0 : 160.0;
-    final radius = isMobile ? 12.0 : 18.0;
-    final cardWidth = widget.expand ? double.infinity : (isMobile ? 160.0 : 220.0);
+    final imgHeight = isMobile ? 105.0 : 160.0;
+    final radius = isMobile ? 10.0 : 18.0;
+    final cardWidth = widget.expand ? double.infinity : (isMobile ? 140.0 : 220.0);
 
     return MouseRegion(
       onEnter: (_) => setState(() => hover = true),
@@ -560,10 +560,10 @@ class _OfferCardState extends State<OfferCard> {
                     ),
                   ),
                   Positioned(
-                    bottom: isMobile ? 6 : 10,
-                    left: isMobile ? 6 : 10,
+                    bottom: isMobile ? 5 : 10,
+                    left: isMobile ? 5 : 10,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 8, vertical: isMobile ? 3 : 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE8590C),
                         borderRadius: BorderRadius.circular(6),
@@ -573,7 +573,7 @@ class _OfferCardState extends State<OfferCard> {
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
-                          fontSize: isMobile ? 10 : 11,
+                          fontSize: isMobile ? 9.5 : 11,
                         ),
                       ),
                     ),
@@ -581,7 +581,7 @@ class _OfferCardState extends State<OfferCard> {
                 ],
               ),
             ),
-            SizedBox(height: isMobile ? 6 : 10),
+            SizedBox(height: isMobile ? 5 : 10),
             GestureDetector(
               onTap: () => Get.toNamed('/offers'),
               child: Text(
@@ -589,14 +589,14 @@ class _OfferCardState extends State<OfferCard> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.title.copyWith(
-                  fontSize: isMobile ? 12.5 : 15,
+                  fontSize: isMobile ? 12 : 15,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                   height: 1.2,
                 ),
               ),
             ),
-            SizedBox(height: isMobile ? 3 : 6),
+            SizedBox(height: isMobile ? 2 : 6),
             Text(
               offer.description.isNotEmpty
                   ? offer.description
@@ -605,7 +605,7 @@ class _OfferCardState extends State<OfferCard> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: isMobile ? 11 : 13,
+                fontSize: isMobile ? 10.5 : 13,
                 height: 1.3,
               ),
             ),
@@ -630,9 +630,9 @@ class ServiceGrid extends StatelessWidget {
       itemCount: services.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: count,
-        mainAxisSpacing: isMobile ? 16 : 24,
-        crossAxisSpacing: isMobile ? 12 : 20,
-        mainAxisExtent: isMobile ? 218 : 285,
+        mainAxisSpacing: isMobile ? 12 : 24,
+        crossAxisSpacing: isMobile ? 10 : 20,
+        mainAxisExtent: isMobile ? 200 : 285,
       ),
       itemBuilder: (_, i) => ServiceCard(service: services[i]),
     );
@@ -649,24 +649,24 @@ class SkeletonServiceCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(isMobile ? 12 : 18),
+          borderRadius: BorderRadius.circular(isMobile ? 10 : 18),
           child: Shimmer.fromColors(
             baseColor: AppColors.cream,
             highlightColor: AppColors.surface,
             child: Container(
-              height: isMobile ? 120 : 190,
+              height: isMobile ? 110 : 190,
               width: double.infinity,
               color: AppColors.cream,
             ),
           ),
         ),
-        SizedBox(height: isMobile ? 6 : 10),
+        SizedBox(height: isMobile ? 5 : 10),
         Shimmer.fromColors(
           baseColor: AppColors.cream,
           highlightColor: AppColors.surface,
           child: Container(height: isMobile ? 12 : 14, width: 140, color: AppColors.cream),
         ),
-        SizedBox(height: isMobile ? 4 : 6),
+        SizedBox(height: isMobile ? 3 : 6),
         Shimmer.fromColors(
           baseColor: AppColors.cream,
           highlightColor: AppColors.surface,

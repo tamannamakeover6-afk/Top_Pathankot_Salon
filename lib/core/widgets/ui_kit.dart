@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tamanna/core/responsive/breakpoints.dart';
 import 'package:tamanna/core/theme/app_colors.dart';
 import 'package:tamanna/core/theme/app_radius.dart';
 import 'package:tamanna/core/theme/app_spacing.dart';
@@ -19,9 +20,9 @@ class ResponsiveContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final w = MediaQuery.sizeOf(context).width;
     final horizontal = w < 600
-        ? 20.0
+        ? 16.0
         : w < 1024
-            ? 36.0
+            ? 32.0
             : w < 1440
                 ? 56.0
                 : 72.0;
@@ -62,18 +63,29 @@ class _PrimaryButtonState extends State<PrimaryButton> {
   bool _down = false;
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     final child = AnimatedScale(
       scale: _down ? 0.98 : 1,
       duration: const Duration(milliseconds: 120),
       child: ElevatedButton.icon(
         onPressed: widget.onTap,
-        icon: widget.icon == null ? const SizedBox.shrink() : Icon(widget.icon, size: 18),
-        label: Text(widget.label, style: AppTextStyles.button),
+        icon: widget.icon == null
+            ? const SizedBox.shrink()
+            : Icon(widget.icon, size: isMobile ? 16 : 18),
+        label: Text(
+          widget.label,
+          style: AppTextStyles.button.copyWith(
+            fontSize: isMobile ? 13 : 14,
+          ),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.ink,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 18 : 22,
+            vertical: isMobile ? 12 : 16,
+          ),
           shape: RoundedRectangleBorder(borderRadius: AppRadius.input),
         ),
       ),
@@ -94,15 +106,25 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     final btn = OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.ink,
         side: const BorderSide(color: AppColors.ink),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 18 : 22,
+          vertical: isMobile ? 12 : 16,
+        ),
         shape: RoundedRectangleBorder(borderRadius: AppRadius.input),
       ),
-      child: Text(label, style: AppTextStyles.button.copyWith(color: AppColors.ink)),
+      child: Text(
+        label,
+        style: AppTextStyles.button.copyWith(
+          color: AppColors.ink,
+          fontSize: isMobile ? 13 : 14,
+        ),
+      ),
     );
     return expand ? SizedBox(width: double.infinity, child: btn) : btn;
   }
@@ -125,8 +147,9 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: EdgeInsets.only(bottom: isMobile ? 14 : 24),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -135,18 +158,51 @@ class SectionHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (eyebrow.isNotEmpty)
-                  Text(eyebrow.toUpperCase(), style: AppTextStyles.caption.copyWith(color: AppColors.gold)),
-                const SizedBox(height: 8),
-                Text(title, style: AppTextStyles.h2),
+                  Text(
+                    eyebrow.toUpperCase(),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.gold,
+                      fontSize: isMobile ? 10.5 : 12,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                SizedBox(height: isMobile ? 4 : 8),
+                Text(
+                  title,
+                  style: isMobile
+                      ? AppTextStyles.h2.copyWith(fontSize: 20, height: 1.2)
+                      : AppTextStyles.h2,
+                ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 8),
-                  Text(subtitle!, style: AppTextStyles.body),
+                  SizedBox(height: isMobile ? 4 : 8),
+                  Text(
+                    subtitle!,
+                    style: isMobile
+                        ? AppTextStyles.body.copyWith(fontSize: 12.5, height: 1.35)
+                        : AppTextStyles.body,
+                  ),
                 ],
               ],
             ),
           ),
           if (action != null)
-            TextButton(onPressed: onAction, child: Text(action!)),
+            TextButton(
+              onPressed: onAction,
+              style: isMobile
+                  ? TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    )
+                  : null,
+              child: Text(
+                action!,
+                style: TextStyle(
+                  fontSize: isMobile ? 12 : 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
         ],
       ),
     );

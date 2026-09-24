@@ -14,10 +14,11 @@ class CategoriesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final catalog = Get.find<CatalogController>();
+    final isMobile = Breakpoints.isMobile(context);
     return SiteShell(
       child: ResponsiveContainer(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 36),
+          padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 36),
           child: Obx(() {
             final cats = catalog.categories;
             if (cats.isEmpty) {
@@ -29,28 +30,29 @@ class CategoriesPage extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('All categories', style: AppTextStyles.h1),
-                const SizedBox(height: 8),
-                Text('Open a category to see its services.', style: AppTextStyles.body),
-                const SizedBox(height: 28),
-                LayoutBuilder(
-                  builder: (context, _) {
-                    final isMobile = Breakpoints.isMobile(context);
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: cats.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: Breakpoints.gridCount(context),
-                        mainAxisSpacing: isMobile ? 14 : 20,
-                        crossAxisSpacing: isMobile ? 12 : 20,
-                        mainAxisExtent: isMobile ? 175 : 225,
-                      ),
-                      itemBuilder: (_, i) => CategoryCard(category: cats[i]),
-                    );
-                  },
+                Text(
+                  'All categories',
+                  style: isMobile
+                      ? AppTextStyles.h2.copyWith(fontSize: 22)
+                      : AppTextStyles.h1,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 6),
+                Text('Open a category to see its services.',
+                    style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary)),
+                SizedBox(height: isMobile ? 16 : 28),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: cats.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: Breakpoints.gridCount(context),
+                    mainAxisSpacing: isMobile ? 10 : 20,
+                    crossAxisSpacing: isMobile ? 10 : 20,
+                    mainAxisExtent: isMobile ? 145 : 225,
+                  ),
+                  itemBuilder: (_, i) => CategoryCard(category: cats[i]),
+                ),
+                SizedBox(height: isMobile ? 24 : 40),
               ],
             );
           }),
@@ -115,9 +117,10 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
           );
         }
         final items = catalog.listing;
+        final isMobile = Breakpoints.isMobile(context);
         return ResponsiveContainer(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: EdgeInsets.symmetric(vertical: isMobile ? 16 : 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -143,11 +146,18 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
-                Text(cat.name, style: AppTextStyles.h1.copyWith(fontSize: 26, fontWeight: FontWeight.w700)),
+                SizedBox(height: isMobile ? 12 : 18),
+                Text(
+                  cat.name,
+                  style: AppTextStyles.h1.copyWith(
+                    fontSize: isMobile ? 22 : 26,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text('${items.length} services', style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-                const SizedBox(height: 20),
+                Text('${items.length} services',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: isMobile ? 12.5 : 14)),
+                SizedBox(height: isMobile ? 14 : 20),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final stacked = constraints.maxWidth < 720;
@@ -181,9 +191,9 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     );
                   },
                 ),
-                const SizedBox(height: 28),
+                SizedBox(height: isMobile ? 18 : 28),
                 _ListingGrid(catalog: catalog, columns: _columns(context)),
-                const SizedBox(height: 48),
+                SizedBox(height: isMobile ? 24 : 48),
               ],
             ),
           ),
@@ -251,9 +261,9 @@ class _ListingGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = Breakpoints.isMobile(context);
-    final mainSpacing = isMobile ? 14.0 : 28.0;
+    final mainSpacing = isMobile ? 12.0 : 28.0;
     final crossSpacing = isMobile ? 10.0 : 24.0;
-    final extent = isMobile ? 218.0 : 285.0;
+    final extent = isMobile ? 200.0 : 285.0;
 
     if (catalog.loadingListing.value) {
       return GridView.builder(

@@ -27,55 +27,60 @@ class _PackagesPageState extends State<PackagesPage> {
     final catalog = Get.find<CatalogController>();
     return SiteShell(
       child: ResponsiveContainer(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 36),
-          child: FutureBuilder(
-            future: catalog.allPackages(),
-            builder: (context, snap) {
-              if (snap.hasError) {
-                return ErrorState(message: ErrorHandler.message(snap.error!), onRetry: () => setState(() {}));
-              }
-              if (!snap.hasData) {
-                return const Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator());
-              }
-              final packs = snap.data ?? [];
-              if (packs.isEmpty) {
-                return const EmptyState(title: 'No packages yet', message: 'Admin can publish beauty packages from the dashboard.');
-              }
-              final isMobile = Breakpoints.isMobile(context);
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Packages',
-                    style: TextStyle(
-                      fontSize: isMobile ? 22 : 32,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text('Thoughtful combinations, priced as a complete ritual.', style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary)),
-                  SizedBox(height: isMobile ? 16 : 24),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final width = constraints.maxWidth;
-                      final columns = Breakpoints.gridCount(context);
-                      final gap = isMobile ? 12.0 : 20.0;
-                      final itemWidth = (width - gap * (columns - 1)) / columns;
-                      return Wrap(
-                        spacing: gap,
-                        runSpacing: isMobile ? 16 : 24,
-                        alignment: WrapAlignment.start,
-                        children: packs.map((p) => PackageCard(pack: p, width: itemWidth)).toList(),
-                      );
-                    },
-                  ),
-                  SizedBox(height: isMobile ? 24 : 40),
-                ],
-              );
-            },
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isMobile = Breakpoints.isMobile(context);
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 36),
+              child: FutureBuilder(
+                future: catalog.allPackages(),
+                builder: (context, snap) {
+                  if (snap.hasError) {
+                    return ErrorState(message: ErrorHandler.message(snap.error!), onRetry: () => setState(() {}));
+                  }
+                  if (!snap.hasData) {
+                    return const Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator());
+                  }
+                  final packs = snap.data ?? [];
+                  if (packs.isEmpty) {
+                    return const EmptyState(title: 'No packages yet', message: 'Admin can publish beauty packages from the dashboard.');
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Packages',
+                        style: TextStyle(
+                          fontSize: isMobile ? 22 : 32,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text('Thoughtful combinations, priced as a complete ritual.',
+                          style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary)),
+                      SizedBox(height: isMobile ? 14 : 24),
+                      LayoutBuilder(
+                        builder: (context, wrapConstraints) {
+                          final width = wrapConstraints.maxWidth;
+                          final columns = Breakpoints.gridCount(context);
+                          final gap = isMobile ? 10.0 : 20.0;
+                          final itemWidth = (width - gap * (columns - 1)) / columns;
+                          return Wrap(
+                            spacing: gap,
+                            runSpacing: isMobile ? 12 : 24,
+                            alignment: WrapAlignment.start,
+                            children: packs.map((p) => PackageCard(pack: p, width: itemWidth)).toList(),
+                          );
+                        },
+                      ),
+                      SizedBox(height: isMobile ? 20 : 40),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
         ),
       ),
     );

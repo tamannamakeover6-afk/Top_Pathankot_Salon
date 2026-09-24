@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tamanna/core/responsive/breakpoints.dart';
+import 'package:tamanna/core/theme/app_colors.dart';
 import 'package:tamanna/core/theme/app_text_styles.dart';
 import 'package:tamanna/core/utils/error_handler.dart';
 import 'package:tamanna/core/widgets/cards.dart';
@@ -18,7 +19,7 @@ class OffersPage extends StatelessWidget {
     return SiteShell(
       child: ResponsiveContainer(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 36),
+          padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 36),
           child: FutureBuilder(
             future: catalog.allOffers(),
             builder: (context, snap) {
@@ -32,10 +33,16 @@ class OffersPage extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Offers', style: AppTextStyles.h1),
-                  const SizedBox(height: 8),
-                  Text('Live savings on selected home rituals.', style: AppTextStyles.body),
-                  const SizedBox(height: 24),
+                  Text(
+                    'Offers',
+                    style: isMobile
+                        ? AppTextStyles.h2.copyWith(fontSize: 22)
+                        : AppTextStyles.h1,
+                  ),
+                  const SizedBox(height: 6),
+                  Text('Live savings on selected home rituals.',
+                      style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary)),
+                  SizedBox(height: isMobile ? 14 : 24),
                   if (offers.isEmpty)
                     const EmptyState(title: 'No live offers', message: 'Check back soon for seasonal savings.')
                   else
@@ -43,11 +50,11 @@ class OffersPage extends StatelessWidget {
                       builder: (context, constraints) {
                         final width = constraints.maxWidth;
                         final columns = Breakpoints.gridCount(context);
-                        final gap = isMobile ? 12.0 : 20.0;
+                        final gap = isMobile ? 10.0 : 20.0;
                         final itemWidth = (width - gap * (columns - 1)) / columns;
                         return Wrap(
                           spacing: gap,
-                          runSpacing: isMobile ? 16 : 24,
+                          runSpacing: isMobile ? 12 : 24,
                           alignment: WrapAlignment.start,
                           children: offers
                               .map(
@@ -60,7 +67,7 @@ class OffersPage extends StatelessWidget {
                         );
                       },
                     ),
-                  const SizedBox(height: 40),
+                  SizedBox(height: isMobile ? 20 : 40),
                 ],
               );
             },

@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     return SiteShell(
       child: Obx(() {
         if (catalog.homeError.isNotEmpty) {
@@ -36,7 +37,7 @@ class _HomePageState extends State<HomePage> {
         return Column(
           children: [
             const _Hero(),
-            const SizedBox(height: 56),
+            SizedBox(height: isMobile ? 22 : 56),
             ResponsiveContainer(
               child: Column(
                 children: [
@@ -49,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                     onAction: () => Get.toNamed('/categories'),
                   ),
                   _CategoryRow(),
-                  const SizedBox(height: 64),
+                  SizedBox(height: isMobile ? 26 : 64),
                   SectionHeader(
                     eyebrow: 'Popular',
                     title: 'Services to book',
@@ -66,7 +67,7 @@ class _HomePageState extends State<HomePage> {
                   else
                     ServiceGrid(services: catalog.homeServices),
                   if (catalog.offers.isNotEmpty) ...[
-                    const SizedBox(height: 64),
+                    SizedBox(height: isMobile ? 26 : 64),
                     SectionHeader(
                       eyebrow: 'This week',
                       title: 'Live offers',
@@ -80,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                           .toList(),
                     ),
                   ],
-                  const SizedBox(height: 64),
+                  SizedBox(height: isMobile ? 26 : 64),
                   SectionHeader(
                     eyebrow: 'Bundles',
                     title: 'Packages made for home',
@@ -93,11 +94,11 @@ class _HomePageState extends State<HomePage> {
                         .map((p) => PackageCard(pack: p))
                         .toList(),
                   ),
-                  const SizedBox(height: 72),
+                  SizedBox(height: isMobile ? 28 : 72),
                   const _Why(),
-                  const SizedBox(height: 72),
+                  SizedBox(height: isMobile ? 28 : 72),
                   const _Cta(),
-                  const SizedBox(height: 48),
+                  SizedBox(height: isMobile ? 20 : 48),
                 ],
               ),
             ),
@@ -113,24 +114,25 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final desktop = Breakpoints.isDesktop(context);
+    final isMobile = Breakpoints.isMobile(context);
     return Container(
       color: AppColors.cream,
       child: ResponsiveContainer(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: desktop ? 64 : 36),
+          padding: EdgeInsets.symmetric(vertical: desktop ? 64 : (isMobile ? 22 : 36)),
           child: desktop
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(child: _heroCopy(desktop)),
+                    Expanded(child: _heroCopy(desktop, isMobile)),
                     const SizedBox(width: 40),
                     const Expanded(child: HeroImage()),
                   ],
                 )
               : Column(
                   children: [
-                    _heroCopy(desktop),
-                    const SizedBox(height: 28),
+                    _heroCopy(desktop, isMobile),
+                    SizedBox(height: isMobile ? 18 : 28),
                     const HeroImage(),
                   ],
                 ),
@@ -139,29 +141,39 @@ class _Hero extends StatelessWidget {
     );
   }
 
-  Widget _heroCopy(bool desktop) {
+  Widget _heroCopy(bool desktop, bool isMobile) {
     return FadeInUp(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'AT-HOME BEAUTY',
-            style: AppTextStyles.caption.copyWith(color: AppColors.gold),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.gold,
+              fontSize: isMobile ? 11 : 12,
+              letterSpacing: 0.6,
+            ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: isMobile ? 8 : 12),
           Text(
             'The salon experience,\nquietly brought home.',
-            style: desktop ? AppTextStyles.display : AppTextStyles.h1,
+            style: desktop
+                ? AppTextStyles.display
+                : (isMobile
+                    ? AppTextStyles.h1.copyWith(fontSize: 26, height: 1.18)
+                    : AppTextStyles.h1),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isMobile ? 10 : 16),
           Text(
             'Facials, waxing, hair spa, bridal prep and more — booked around your day, in your space.',
-            style: AppTextStyles.body,
+            style: isMobile
+                ? AppTextStyles.body.copyWith(fontSize: 13.5, height: 1.4)
+                : AppTextStyles.body,
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: isMobile ? 16 : 28),
           Wrap(
-            spacing: 12,
-            runSpacing: 12,
+            spacing: isMobile ? 10 : 12,
+            runSpacing: isMobile ? 10 : 12,
             children: [
               PrimaryButton(
                 label: 'Explore Services',
@@ -184,35 +196,21 @@ class HeroImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     return FadeInUp(
       delayMs: 80,
-      child: Container(
-        // color: Colors.white,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
         child: Image.asset(
-          'assets/images/banner.png', // Apni asset file ka path yahan dalein
-          height: 420,
+          'assets/images/banner.png',
+          height: isMobile ? 165 : 380,
           width: double.infinity,
-          fit: BoxFit.fitWidth, // Banner ko clean fit karne ke liye
+          fit: BoxFit.cover,
         ),
       ),
     );
   }
 }
-
-// class HeroImage extends StatelessWidget {
-//   const HeroImage({super.key});
-//   @override
-//   Widget build(BuildContext context) {
-//     return FadeInUp(
-//       delayMs: 80,
-//       child: const CloudinaryImage(
-//         url: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1400&q=80',
-//         height: 420,
-//         width: double.infinity,
-//       ),
-//     );
-//   }
-// }
 
 class _CategoryRow extends StatelessWidget {
   @override
@@ -232,9 +230,9 @@ class _CategoryRow extends StatelessWidget {
       itemCount: cats.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: count,
-        mainAxisSpacing: isMobile ? 14 : 20,
-        crossAxisSpacing: isMobile ? 12 : 20,
-        mainAxisExtent: isMobile ? 175 : 225,
+        mainAxisSpacing: isMobile ? 10 : 20,
+        crossAxisSpacing: isMobile ? 10 : 20,
+        mainAxisExtent: isMobile ? 145 : 225,
       ),
       itemBuilder: (_, i) => CategoryCard(category: cats[i]),
     );
@@ -253,12 +251,14 @@ class _HScroll extends StatelessWidget {
         child: Text(empty),
       );
     }
+    final isMobile = Breakpoints.isMobile(context);
     return SizedBox(
-      height: Breakpoints.isMobile(context) ? 220 : 260,
+      height: isMobile ? 190 : 260,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
         itemBuilder: (_, i) => children[i],
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        separatorBuilder: (context, index) => SizedBox(width: isMobile ? 10 : 16),
         itemCount: children.length,
       ),
     );
@@ -297,6 +297,7 @@ class _Why extends StatelessWidget {
         'Slots that fit around your day.',
       ),
     ];
+    final isMobile = Breakpoints.isMobile(context);
     final count = Breakpoints.gridCount(context, max: 3);
     return Column(
       children: [
@@ -310,26 +311,41 @@ class _Why extends StatelessWidget {
           itemCount: items.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: count,
-            mainAxisExtent: 140,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
+            mainAxisExtent: isMobile ? 116 : 140,
+            mainAxisSpacing: isMobile ? 10 : 16,
+            crossAxisSpacing: isMobile ? 10 : 16,
           ),
           itemBuilder: (_, i) {
             final item = items[i];
             return Container(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(isMobile ? 12 : 20),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(isMobile ? 14 : 22),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(item.$1, color: AppColors.rose),
-                  const SizedBox(height: 12),
-                  Text(item.$2, style: AppTextStyles.title),
-                  const SizedBox(height: 4),
-                  Text(item.$3, style: AppTextStyles.small),
+                  Icon(item.$1, color: AppColors.rose, size: isMobile ? 20 : 24),
+                  SizedBox(height: isMobile ? 6 : 12),
+                  Text(
+                    item.$2,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: isMobile
+                        ? AppTextStyles.title.copyWith(fontSize: 12.5, fontWeight: FontWeight.w600)
+                        : AppTextStyles.title,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item.$3,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: isMobile
+                        ? AppTextStyles.small.copyWith(fontSize: 10.5, height: 1.2)
+                        : AppTextStyles.small,
+                  ),
                 ],
               ),
             );
@@ -344,21 +360,27 @@ class _Cta extends StatelessWidget {
   const _Cta();
   @override
   Widget build(BuildContext context) {
+    final isMobile = Breakpoints.isMobile(context);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 28),
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 26 : 48,
+        horizontal: isMobile ? 18 : 28,
+      ),
       decoration: BoxDecoration(
         color: AppColors.ink,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(isMobile ? 18 : 28),
       ),
       child: Column(
         children: [
           Text(
             'Bring the salon experience home.',
-            style: AppTextStyles.h2.copyWith(color: Colors.white),
+            style: isMobile
+                ? AppTextStyles.h3.copyWith(color: Colors.white, fontSize: 18)
+                : AppTextStyles.h2.copyWith(color: Colors.white),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isMobile ? 12 : 16),
           PrimaryButton(
             label: 'Request a Service',
             onTap: () => Get.toNamed('/categories'),

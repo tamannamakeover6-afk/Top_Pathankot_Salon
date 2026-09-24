@@ -28,8 +28,8 @@ class TamannaFooter extends StatelessWidget {
           // 2. Main Footer Body (Responsive Grid / Stack)
           ResponsiveContainer(
             padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 20 : 36,
-              vertical: isMobile ? 36 : 52,
+              horizontal: isMobile ? 16 : 36,
+              vertical: isMobile ? 24 : 52,
             ),
             child: isMobile
                 ? _buildMobileLayout(context)
@@ -52,44 +52,14 @@ class TamannaFooter extends StatelessWidget {
       children: [
         // Col 1: Brand & Mission
         Expanded(
-          flex: isTablet ? 3 : 4,
+          flex: isTablet ? 3 : 5,
           child: _BrandColumn(),
         ),
-        const SizedBox(width: 40),
+        SizedBox(width: isTablet ? 36 : 64),
 
-        // Col 2: Services
+        // Col 2: Hours & Support
         Expanded(
-          flex: 2,
-          child: _ColumnSection(
-            title: 'Services',
-            links: [
-              _LinkData('All Categories', AppRoutes.categories),
-              _LinkData('Bridal & Packages', AppRoutes.packages),
-              _LinkData('Special Offers', AppRoutes.offers),
-              _LinkData('Book Service', AppRoutes.booking),
-            ],
-          ),
-        ),
-        const SizedBox(width: 32),
-
-        // Col 3: Company
-        Expanded(
-          flex: 2,
-          child: _ColumnSection(
-            title: 'Company',
-            links: [
-              _LinkData('About Tamanna', AppRoutes.about),
-              _LinkData('Contact & Support', AppRoutes.contact),
-              _LinkData('Privacy Policy', AppRoutes.privacy),
-              _LinkData('Terms of Service', AppRoutes.terms),
-            ],
-          ),
-        ),
-        const SizedBox(width: 32),
-
-        // Col 4: Contact & Hours
-        Expanded(
-          flex: isTablet ? 3 : 3,
+          flex: isTablet ? 3 : 4,
           child: _ContactHoursColumn(),
         ),
       ],
@@ -101,40 +71,7 @@ class TamannaFooter extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _BrandColumn(),
-        const SizedBox(height: 32),
-
-        // 2-column grid for Services & Company
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _ColumnSection(
-                title: 'Services',
-                links: [
-                  _LinkData('Categories', AppRoutes.categories),
-                  _LinkData('Packages', AppRoutes.packages),
-                  _LinkData('Offers', AppRoutes.offers),
-                  _LinkData('Book Now', AppRoutes.booking),
-                ],
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: _ColumnSection(
-                title: 'Company',
-                links: [
-                  _LinkData('About Us', AppRoutes.about),
-                  _LinkData('Contact', AppRoutes.contact),
-                  _LinkData('Privacy', AppRoutes.privacy),
-                  _LinkData('Terms', AppRoutes.terms),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-
-        // Contact & Hours
+        const SizedBox(height: 24),
         _ContactHoursColumn(),
       ],
     );
@@ -356,100 +293,6 @@ class _BrandColumn extends StatelessWidget {
 }
 
 // -----------------------------------------------------------------------------
-// SECTION COLUMN (LINKS)
-// -----------------------------------------------------------------------------
-class _ColumnSection extends StatelessWidget {
-  final String title;
-  final List<_LinkData> links;
-  const _ColumnSection({required this.title, required this.links});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          width: 24,
-          height: 2,
-          decoration: BoxDecoration(
-            color: const Color(0xFFE8590C),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(height: 14),
-        ...links.map((link) => _HoverFooterLink(label: link.label, route: link.route)),
-      ],
-    );
-  }
-}
-
-class _LinkData {
-  final String label;
-  final String route;
-  const _LinkData(this.label, this.route);
-}
-
-class _HoverFooterLink extends StatefulWidget {
-  final String label;
-  final String route;
-  const _HoverFooterLink({required this.label, required this.route});
-
-  @override
-  State<_HoverFooterLink> createState() => _HoverFooterLinkState();
-}
-
-class _HoverFooterLinkState extends State<_HoverFooterLink> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: () => Get.toNamed(widget.route),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 140),
-                width: _hovered ? 6 : 0,
-                height: 2,
-                margin: EdgeInsets.only(right: _hovered ? 6 : 0),
-                color: const Color(0xFFE8590C),
-              ),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 140),
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: _hovered ? FontWeight.w600 : FontWeight.w400,
-                  color: _hovered ? Colors.white : const Color(0xFFB5A49C),
-                  letterSpacing: 0.1,
-                ),
-                child: Text(widget.label),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// -----------------------------------------------------------------------------
 // CONTACT & HOURS COLUMN
 // -----------------------------------------------------------------------------
 class _ContactHoursColumn extends StatelessWidget {
@@ -485,33 +328,9 @@ class _ContactHoursColumn extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _contactRow(
-          icon: Icons.phone_android_rounded,
-          title: 'Direct Line',
-          value: AppConstants.phone,
-          onTap: () => launchUrl(Uri.parse('tel:${AppConstants.phone}')),
-        ),
-        const SizedBox(height: 12),
-        _contactRow(
-          icon: Icons.mail_outline_rounded,
-          title: 'Customer Help',
-          value: AppConstants.email,
-          onTap: () => launchUrl(Uri.parse('mailto:${AppConstants.email}')),
-        ),
-        const SizedBox(height: 12),
-        _contactRow(
           icon: Icons.location_on_outlined,
           title: 'Service Area',
           value: AppConstants.serviceArea,
-        ),
-        const SizedBox(height: 12),
-        _contactRow(
-          icon: Icons.camera_alt_outlined,
-          title: 'Instagram',
-          value: '@tama.nnabeautysalon',
-          onTap: () => launchUrl(
-            Uri.parse(AppConstants.instagram),
-            mode: LaunchMode.externalApplication,
-          ),
         ),
       ],
     );
@@ -660,37 +479,53 @@ class _BottomAttributionBar extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
             children: [
-              // BOLD LINE PROMINENTLY DISPLAYED AS REQUESTED
-              Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1F1714),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE8590C).withValues(alpha: 0.45)),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x22E8590C),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
+              // BOLD LINE PROMINENTLY DISPLAYED AS REQUESTED - OPENS INSTAGRAM LINK
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () => launchUrl(
+                    Uri.parse('https://www.instagram.com/pb_it_hub?stkn=aXRkenJyeGpoNzN3'),
+                    mode: LaunchMode.externalApplication,
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1F1714),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE8590C).withValues(alpha: 0.45)),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x22E8590C),
+                          blurRadius: 10,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.bolt_rounded, size: 16, color: Color(0xFFE8590C)),
-                    SizedBox(width: 7),
-                    Text(
-                      'Made By Pb_IT_HUB',
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.8,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ClipOval(
+                          child: Image.asset(
+                            'assets/images/pb_it_hub_logo.jpg',
+                            width: 22,
+                            height: 22,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Made By Pb_IT_HUB',
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
 
