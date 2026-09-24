@@ -79,18 +79,50 @@ class TamannaHeader extends StatelessWidget {
             height: isMobile ? 58 : 76,
             child: Row(
               children: [
-                InkWell(
-                  onTap: () => Get.toNamed('/'),
-                  child: Padding(
-                    padding: EdgeInsets.all(isMobile ? 2.0 : 5.0),
-                    child: Image.asset(
-                      'assets/images/logo500.png',
-                      height: isMobile ? 36 : 48,
-                      fit: BoxFit.contain,
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: InkWell(
+                      onTap: () => Get.toNamed('/'),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 2 : 4,
+                          vertical: isMobile ? 4 : 6,
+                        ),
+                        child: Image.asset(
+                          'assets/images/header_logo.png',
+                          height: isMobile ? 34 : 44,
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                          errorBuilder: (_, _, _) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/images/logo.png',
+                                height: isMobile ? 32 : 40,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, _, _) => Icon(
+                                  Icons.spa_rounded,
+                                  size: isMobile ? 28 : 34,
+                                  color: AppColors.ink,
+                                ),
+                              ),
+                              SizedBox(width: isMobile ? 6 : 8),
+                              Text(
+                                'Tamanna',
+                                style: AppTextStyles.h3.copyWith(
+                                  fontSize: isMobile ? 18 : 22,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                const Spacer(),
                 if (desktop) ...[
                   _Nav('Home', '/'),
                   _Nav('Categories', '/categories'),

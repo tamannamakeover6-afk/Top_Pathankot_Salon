@@ -39,11 +39,26 @@ class _PackagesPageState extends State<PackagesPage> {
                     return ErrorState(message: ErrorHandler.message(snap.error!), onRetry: () => setState(() {}));
                   }
                   if (!snap.hasData) {
-                    return const Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator());
+                    return SizedBox(
+                      height: isMobile ? 320 : 420,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.gold,
+                        ),
+                      ),
+                    );
                   }
                   final packs = snap.data ?? [];
                   if (packs.isEmpty) {
-                    return const EmptyState(title: 'No packages yet', message: 'Admin can publish beauty packages from the dashboard.');
+                    return SizedBox(
+                      height: isMobile ? 320 : 420,
+                      child: const Center(
+                        child: EmptyState(
+                          title: 'No packages yet',
+                          message: 'Admin can publish beauty packages from the dashboard.',
+                        ),
+                      ),
+                    );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,12 +166,23 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) return const SiteShell(child: Padding(padding: EdgeInsets.all(48), child: CircularProgressIndicator()));
+    final isMobile = Breakpoints.isMobile(context);
+    if (loading) {
+      return SiteShell(
+        child: SizedBox(
+          height: isMobile ? 360 : 480,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.gold,
+            ),
+          ),
+        ),
+      );
+    }
     if (error != null || pack == null) {
       return SiteShell(child: ErrorState(message: error ?? 'Not found', onRetry: _load));
     }
     final p = pack!;
-    final isMobile = Breakpoints.isMobile(context);
     return SiteShell(
       child: Column(
         children: [
