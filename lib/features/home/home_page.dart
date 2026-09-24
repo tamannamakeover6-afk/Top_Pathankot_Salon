@@ -119,20 +119,28 @@ class _Hero extends StatelessWidget {
       color: AppColors.cream,
       child: ResponsiveContainer(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: desktop ? 64 : (isMobile ? 22 : 36)),
+          padding: EdgeInsets.symmetric(
+            vertical: desktop ? 64 : (isMobile ? 22 : 36),
+          ),
           child: desktop
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(child: _heroCopy(desktop, isMobile)),
-                    const SizedBox(width: 40),
-                    const Expanded(child: HeroImage()),
+                    Expanded(
+                      flex: 5,
+                      child: _heroCopy(context, desktop, isMobile),
+                    ),
+                    const SizedBox(width: 56),
+                    const Expanded(
+                      flex: 5,
+                      child: HeroImage(),
+                    ),
                   ],
                 )
               : Column(
                   children: [
-                    _heroCopy(desktop, isMobile),
-                    SizedBox(height: isMobile ? 18 : 28),
+                    _heroCopy(context, desktop, isMobile),
+                    SizedBox(height: isMobile ? 20 : 32),
                     const HeroImage(),
                   ],
                 ),
@@ -141,7 +149,16 @@ class _Hero extends StatelessWidget {
     );
   }
 
-  Widget _heroCopy(bool desktop, bool isMobile) {
+  Widget _heroCopy(BuildContext context, bool desktop, bool isMobile) {
+    final width = MediaQuery.sizeOf(context).width;
+    final headingStyle = desktop
+        ? (width < 1280
+            ? AppTextStyles.h1.copyWith(fontSize: 40, height: 1.15)
+            : AppTextStyles.display)
+        : (isMobile
+            ? AppTextStyles.h1.copyWith(fontSize: 26, height: 1.18)
+            : AppTextStyles.h1);
+
     return FadeInUp(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,18 +174,17 @@ class _Hero extends StatelessWidget {
           SizedBox(height: isMobile ? 8 : 12),
           Text(
             'The salon experience,\nquietly brought home.',
-            style: desktop
-                ? AppTextStyles.display
-                : (isMobile
-                    ? AppTextStyles.h1.copyWith(fontSize: 26, height: 1.18)
-                    : AppTextStyles.h1),
+            style: headingStyle,
           ),
           SizedBox(height: isMobile ? 10 : 16),
-          Text(
-            'Facials, waxing, hair spa, bridal prep and more — booked around your day, in your space.',
-            style: isMobile
-                ? AppTextStyles.body.copyWith(fontSize: 13.5, height: 1.4)
-                : AppTextStyles.body,
+          Padding(
+            padding: EdgeInsets.only(right: desktop ? 24 : 0),
+            child: Text(
+              'Facials, waxing, hair spa, bridal prep and more — booked around your day, in your space.',
+              style: isMobile
+                  ? AppTextStyles.body.copyWith(fontSize: 13.5, height: 1.4)
+                  : AppTextStyles.body,
+            ),
           ),
           SizedBox(height: isMobile ? 16 : 28),
           Wrap(
@@ -201,11 +217,12 @@ class HeroImage extends StatelessWidget {
       delayMs: 80,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(isMobile ? 14 : 20),
-        child: Image.asset(
-          'assets/images/banner.png',
-          height: isMobile ? 165 : 380,
-          width: double.infinity,
-          fit: BoxFit.cover,
+        child: AspectRatio(
+          aspectRatio: 2752 / 1536,
+          child: Image.asset(
+            'assets/images/banner.png',
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

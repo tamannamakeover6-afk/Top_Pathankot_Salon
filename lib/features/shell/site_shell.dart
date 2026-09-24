@@ -96,10 +96,6 @@ class TamannaHeader extends StatelessWidget {
                   _Nav('Categories', '/categories'),
                   _Nav('Packages', '/packages'),
                   _Nav('Offers', '/offers'),
-                  IconButton(
-                    onPressed: () => Get.toNamed('/search'),
-                    icon: const Icon(Icons.search),
-                  ),
                   _Account(),
                   const SizedBox(width: 8),
                   PrimaryButton(
@@ -107,10 +103,6 @@ class TamannaHeader extends StatelessWidget {
                     onTap: () => Get.toNamed('/categories'),
                   ),
                 ] else ...[
-                  IconButton(
-                    onPressed: () => Get.toNamed('/search'),
-                    icon: const Icon(Icons.search),
-                  ),
                   _Account(),
                   IconButton(
                     onPressed: () => _openMenu(context),
