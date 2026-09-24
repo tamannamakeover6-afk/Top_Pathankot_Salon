@@ -56,9 +56,8 @@ class _HomePageState extends State<HomePage> {
                     action: 'View all',
                     onAction: () => Get.toNamed('/categories'),
                   ),
-                  if (catalog.loadingHome.value)
-                    const SizedBox(height: 280, child: SkeletonServiceCard())
-                  else if (catalog.homeServices.isEmpty)
+               
+                  if (catalog.homeServices.isEmpty)
                     EmptyState(
                       title: 'Catalog coming soon',
                       message:

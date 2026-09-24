@@ -20,6 +20,7 @@ import 'package:tamanna/data/repositories/offer_repository.dart';
 import 'package:tamanna/data/repositories/package_repository.dart';
 import 'package:tamanna/data/repositories/review_repository.dart';
 import 'package:tamanna/data/repositories/service_repository.dart';
+import 'package:tamanna/data/services/parlour_data_seeder.dart';
 import 'package:tamanna/features/admin/admin_shell.dart';
 
 class AdminDashboardPage extends StatelessWidget {
