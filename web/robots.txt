@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tamannamakeover6-afk.github.io/Top_Pathankot_Salon/sitemap.xml

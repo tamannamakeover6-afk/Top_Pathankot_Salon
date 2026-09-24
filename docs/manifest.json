@@ -1,11 +1,11 @@
 {
-    "name": "tamanna",
-    "short_name": "tamanna",
+    "name": "Tamanna — Top Pathankot Salon",
+    "short_name": "Tamanna",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F7F1EA",
+    "theme_color": "#1C1412",
+    "description": "At-home beauty salon in Pathankot 145001. Facials, waxing, hair spa, bridal makeup.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
