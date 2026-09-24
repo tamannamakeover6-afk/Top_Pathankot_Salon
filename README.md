@@ -11,6 +11,30 @@ flutter pub get
 flutter run -d chrome
 ```
 
+## GitHub Pages (live site)
+
+The built website is in the `docs/` folder.
+
+1. Open the repo on GitHub → **Settings** → **Pages**
+2. Under **Build and deployment**:
+   - Source: **Deploy from a branch**
+   - Branch: **main**
+   - Folder: **/docs**
+3. Save, wait 1–2 minutes
+4. Open: **https://tamannamakeover6-afk.github.io/tamanna_makeover/**
+
+Do **not** use the repo root as Pages source — that only shows the README.
+
+### Rebuild after code changes
+
+```bash
+flutter build web --release --base-href "/tamanna_makeover/"
+rm -rf docs && mkdir docs && cp -R build/web/. docs/ && touch docs/.nojekyll && cp docs/index.html docs/404.html
+git add docs && git commit -m "Update live site build" && git push
+```
+
+There is also a GitHub Action (`.github/workflows/deploy-pages.yml`) that can deploy automatically after you enable **Settings → Pages → Source: GitHub Actions**.
+
 ## Build for Firebase Hosting
 
 ```bash
