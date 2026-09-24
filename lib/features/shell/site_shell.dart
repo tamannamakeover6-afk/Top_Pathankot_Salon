@@ -81,18 +81,26 @@ class TamannaHeader extends StatelessWidget {
               children: [
                 InkWell(
                   onTap: () => Get.toNamed('/'),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(isMobile ? 6 : 8),
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          height: isMobile ? 36 : 44,
-                          width: isMobile ? 36 : 44,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.high,
+                      Container(
+                        height: isMobile ? 40 : 48,
+                        width: isMobile ? 40 : 48,
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
+                          border: Border.all(color: const Color(0xFFE6DCD5)),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(isMobile ? 5 : 7),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                          ),
                         ),
                       ),
                       SizedBox(width: isMobile ? 8 : 10),
