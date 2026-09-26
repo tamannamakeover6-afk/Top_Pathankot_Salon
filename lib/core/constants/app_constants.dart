@@ -13,9 +13,10 @@ class AppConstants {
       'https://www.instagram.com/tama.nnabeautysalon/';
   static const String siteTitle =
       'Tamanna | Home Salon Pathankot & Sujanpur — Bridal Makeup, Facial, Waxing';
-  static const String developerName = 'PB_IT_hub';
+  static const String developerName = 'PB_IT_HUB';
   static const String developerInstagram =
-      'https://www.instagram.com/pb_it_hub?stkn=aXRkenJyeGpoNzN3';
+      'https://www.instagram.com/pb_it_hub/';
+  static const String developerSeoTag = 'PB_IT_HUB';
   static const String supportMessage =
       'Hello Tamanna, I would like to book a home beauty service in Pathankot / Sujanpur.';
 
