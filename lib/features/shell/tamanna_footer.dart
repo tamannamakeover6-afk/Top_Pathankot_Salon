@@ -484,7 +484,7 @@ class _BottomAttributionBar extends StatelessWidget {
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
                   onTap: () => launchUrl(
-                    Uri.parse('https://www.instagram.com/pb_it_hub?stkn=aXRkenJyeGpoNzN3'),
+                    Uri.parse(AppConstants.developerInstagram),
                     mode: LaunchMode.externalApplication,
                   ),
                   child: Container(
@@ -514,9 +514,9 @@ class _BottomAttributionBar extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Made By Pb_IT_HUB',
-                          style: TextStyle(
+                        Text(
+                          'Made By ${AppConstants.developerName}',
+                          style: const TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,

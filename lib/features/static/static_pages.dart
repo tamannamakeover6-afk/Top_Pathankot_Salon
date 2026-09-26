@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tamanna/core/constants/app_constants.dart';
 import 'package:tamanna/core/responsive/breakpoints.dart';
+import 'package:tamanna/core/theme/app_colors.dart';
 import 'package:tamanna/core/theme/app_text_styles.dart';
 import 'package:tamanna/core/widgets/ui_kit.dart';
 import 'package:tamanna/features/shell/site_shell.dart';
@@ -36,6 +37,149 @@ class AboutPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text('Service area: ${AppConstants.serviceArea}', style: AppTextStyles.title.copyWith(fontSize: isMobile ? 14 : 18)),
+              const SizedBox(height: 28),
+              // Digital Partner Card
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x0C1C1412),
+                      blurRadius: 16,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                  'assets/images/pb_it_hub_logo.jpg',
+                                  width: 44,
+                                  height: 44,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Digital Partner & Development',
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      AppConstants.developerName,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Website engineered and crafted by PB_IT_hub. Driving modern digital beauty and service experiences across Punjab.',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: AppColors.textSecondary,
+                              height: 1.45,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () => launchUrl(
+                                Uri.parse(AppConstants.developerInstagram),
+                                mode: LaunchMode.externalApplication,
+                              ),
+                              icon: const Icon(Icons.open_in_new, size: 14),
+                              label: const Text('Visit PB_IT_hub on Instagram'),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              'assets/images/pb_it_hub_logo.jpg',
+                              width: 52,
+                              height: 52,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'DIGITAL PARTNER & DEVELOPMENT',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.0,
+                                    color: AppColors.gold,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  AppConstants.developerName,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'Website engineered and crafted by PB_IT_hub. Powering local commerce & digital discovery across Punjab.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              side: const BorderSide(color: AppColors.border),
+                            ),
+                            onPressed: () => launchUrl(
+                              Uri.parse(AppConstants.developerInstagram),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                            icon: const Icon(Icons.open_in_new, size: 15),
+                            label: const Text('Connect with PB_IT_hub'),
+                          ),
+                        ],
+                      ),
+              ),
               SizedBox(height: isMobile ? 24 : 40),
             ],
           ),

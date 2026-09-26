@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tamanna/core/constants/app_constants.dart';
 import 'package:tamanna/core/utils/price_utils.dart';
 import 'package:tamanna/core/utils/slug_utils.dart';
-import 'package:tamanna/data/models/category_model.dart';
-import 'package:tamanna/data/models/service_model.dart';
 
 class ParlourDataSeeder {
   static final _db = FirebaseFirestore.instance;

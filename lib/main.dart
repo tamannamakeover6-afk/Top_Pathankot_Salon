@@ -42,7 +42,7 @@ class TamannaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Tamanna | Beauty at Home',
+      title: AppConstants.siteTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       initialBinding: InitialBinding(),

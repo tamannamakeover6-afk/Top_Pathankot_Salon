@@ -8,7 +8,13 @@ class AppConstants {
   static const String city = 'Pathankot';
   static const String pincode = '145001';
   static const String serviceArea = 'Pathankot, 145001';
-  static const String instagram = 'https://www.instagram.com/tama.nnabeautysalon/';
+  static const String instagram =
+      'https://www.instagram.com/tama.nnabeautysalon/';
+  static const String siteTitle =
+      'Tamanna | Top Pathankot Salon — Beauty at Home (145001)';
+  static const String developerName = 'PB_IT_hub';
+  static const String developerInstagram =
+      'https://www.instagram.com/pb_it_hub?stkn=aXRkenJyeGpoNzN3';
   static const String supportMessage =
       'Hello Tamanna, I would like to book a home beauty service in Pathankot.';
 
