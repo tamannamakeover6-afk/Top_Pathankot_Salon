@@ -7,16 +7,17 @@ class AppConstants {
   static const String email = 'hello@tamanna.beauty';
   static const String city = 'Pathankot';
   static const String pincode = '145001';
-  static const String serviceArea = 'Pathankot, 145001';
+  static const String serviceArea = 'Pathankot, Sujanpur & nearby · 145001';
+  static const String serviceAreaShort = 'Pathankot & Sujanpur (145001)';
   static const String instagram =
       'https://www.instagram.com/tama.nnabeautysalon/';
   static const String siteTitle =
-      'Tamanna | Top Pathankot Salon — Beauty at Home (145001)';
+      'Tamanna | Home Salon Pathankot & Sujanpur — Bridal Makeup, Facial, Waxing';
   static const String developerName = 'PB_IT_hub';
   static const String developerInstagram =
       'https://www.instagram.com/pb_it_hub?stkn=aXRkenJyeGpoNzN3';
   static const String supportMessage =
-      'Hello Tamanna, I would like to book a home beauty service in Pathankot.';
+      'Hello Tamanna, I would like to book a home beauty service in Pathankot / Sujanpur.';
 
   static const String hiveUserBox = 'user';
   static const String hiveUserListBox = 'userList';

@@ -180,7 +180,7 @@ class _Hero extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(right: desktop ? 24 : 0),
             child: Text(
-              'Facials, waxing, hair spa, bridal prep and more — booked around your day, in your space.',
+              'Facials, waxing, hair spa, bridal & party makeup — home service parlour for Pathankot & Sujanpur.',
               style: isMobile
                   ? AppTextStyles.body.copyWith(fontSize: 13.5, height: 1.4)
                   : AppTextStyles.body,

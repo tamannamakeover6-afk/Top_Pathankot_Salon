@@ -1,13 +1,14 @@
 {
-    "name": "Tamanna — Top Pathankot Salon",
+    "name": "Tamanna — Home Salon Pathankot & Sujanpur",
     "short_name": "Tamanna",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#F7F1EA",
     "theme_color": "#1C1412",
-    "description": "At-home beauty salon & parlour in Pathankot 145001. Facials, waxing, hair spa, bridal makeup. Built by PB_IT_hub.",
+    "description": "Home service parlour in Pathankot & Sujanpur 145001. Bridal makeup, party makeup, facial, waxing, hair spa at your doorstep.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "lang": "en-IN",
     "icons": [
         {
             "src": "icons/Icon-192.png",

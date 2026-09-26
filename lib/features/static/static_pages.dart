@@ -27,16 +27,21 @@ class AboutPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Tamanna brings professional beauty and wellness rituals to your home in Pathankot (145001). From facials and waxing to hair spa and bridal prep, every service is designed around comfort, transparency and care.',
+                'Tamanna brings professional beauty and wellness rituals to your home across Pathankot, Sujanpur and nearby areas (145001). From facials and waxing to hair spa, party makeup and bridal prep — every service is designed around comfort, transparency and care.',
                 style: isMobile ? AppTextStyles.body.copyWith(fontSize: 13.5) : AppTextStyles.body,
               ),
               const SizedBox(height: 12),
               Text(
-                'We are not a walk-in salon chain. We come to you across Pathankot — with verified professionals, clear pricing and a booking flow that respects your time.',
+                'We are not a walk-in salon chain. We come to you — doorstep salon for ladies, bridal makeup artist home service, and grooming packages without leaving home.',
                 style: isMobile ? AppTextStyles.body.copyWith(fontSize: 13.5) : AppTextStyles.body,
               ),
               const SizedBox(height: 16),
               Text('Service area: ${AppConstants.serviceArea}', style: AppTextStyles.title.copyWith(fontSize: isMobile ? 14 : 18)),
+              const SizedBox(height: 8),
+              Text(
+                'Popular bookings: home service parlour near Sujanpur Pathankot · bridal / party makeup at home · facial, waxing & hair spa doorstep packages.',
+                style: TextStyle(fontSize: isMobile ? 12.5 : 14, color: AppColors.textSecondary, height: 1.4),
+              ),
               const SizedBox(height: 28),
               // Digital Partner Card
               Container(
@@ -209,11 +214,16 @@ class ContactPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Call or message us to plan a home appointment in Pathankot (${AppConstants.pincode}).',
+                'Call or WhatsApp to book a home appointment in Pathankot, Sujanpur or nearby (${AppConstants.pincode}).',
                 style: isMobile ? AppTextStyles.body.copyWith(fontSize: 13.5) : AppTextStyles.body,
               ),
               const SizedBox(height: 8),
               Text('Service area: ${AppConstants.serviceArea}', style: AppTextStyles.small),
+              const SizedBox(height: 6),
+              Text(
+                'Bridal makeup · party makeup · facial · waxing · hair spa — at your doorstep.',
+                style: TextStyle(fontSize: isMobile ? 12 : 13, color: AppColors.textSecondary),
+              ),
               SizedBox(height: isMobile ? 16 : 20),
               PrimaryButton(
                 label: 'Call ${AppConstants.phone}',

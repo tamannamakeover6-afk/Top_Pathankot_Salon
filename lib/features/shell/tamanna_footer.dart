@@ -101,7 +101,7 @@ class _TrustPerksBar extends StatelessWidget {
       _PerkItem(
         icon: Icons.home_repair_service_outlined,
         title: 'Salon At Your Doorstep',
-        subtitle: 'At-home beauty across Pathankot 145001',
+        subtitle: 'Pathankot, Sujanpur & nearby 145001',
       ),
       _PerkItem(
         icon: Icons.payments_outlined,
