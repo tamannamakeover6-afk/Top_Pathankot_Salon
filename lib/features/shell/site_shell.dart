@@ -72,7 +72,6 @@ class TamannaHeader extends StatelessWidget {
         boxShadow: solid ? AppShadows.header : [],
       ),
       child: SafeArea(
-        bottom: false,
         child: ResponsiveContainer(
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16),
           child: SizedBox(
