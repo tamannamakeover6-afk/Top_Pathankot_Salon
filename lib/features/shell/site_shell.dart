@@ -90,7 +90,9 @@ class TamannaHeader extends StatelessWidget {
                         padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
+                          borderRadius: BorderRadius.circular(
+                            isMobile ? 8 : 10,
+                          ),
                           border: Border.all(color: const Color(0xFFE6DCD5)),
                         ),
                         child: ClipRRect(
@@ -147,37 +149,42 @@ class TamannaHeader extends StatelessWidget {
       backgroundColor: AppColors.surface,
       builder: (_) => Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(title: const Text('Home'), onTap: () => Get.toNamed('/')),
-            ListTile(
-              title: const Text('Categories'),
-              onTap: () => Get.toNamed('/categories'),
-            ),
-            ListTile(
-              title: const Text('Packages'),
-              onTap: () => Get.toNamed('/packages'),
-            ),
-            ListTile(
-              title: const Text('Offers'),
-              onTap: () => Get.toNamed('/offers'),
-            ),
-            ListTile(
-              title: const Text('About'),
-              onTap: () => Get.toNamed('/about'),
-            ),
-            ListTile(
-              title: const Text('Contact'),
-              onTap: () => Get.toNamed('/contact'),
-            ),
-            const SizedBox(height: 8),
-            PrimaryButton(
-              label: 'Request a Service',
-              expand: true,
-              onTap: () => Get.toNamed('/categories'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Home'),
+                onTap: () => Get.toNamed('/'),
+              ),
+              ListTile(
+                title: const Text('Categories'),
+                onTap: () => Get.toNamed('/categories'),
+              ),
+              ListTile(
+                title: const Text('Packages'),
+                onTap: () => Get.toNamed('/packages'),
+              ),
+              ListTile(
+                title: const Text('Offers'),
+                onTap: () => Get.toNamed('/offers'),
+              ),
+              ListTile(
+                title: const Text('About'),
+                onTap: () => Get.toNamed('/about'),
+              ),
+              ListTile(
+                title: const Text('Contact'),
+                onTap: () => Get.toNamed('/contact'),
+              ),
+              const SizedBox(height: 8),
+              PrimaryButton(
+                label: 'Request a Service',
+                expand: true,
+                onTap: () => Get.toNamed('/categories'),
+              ),
+            ],
+          ),
         ),
       ),
     );
