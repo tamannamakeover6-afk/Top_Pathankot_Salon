@@ -100,35 +100,37 @@ class AdminCategoriesPage extends StatelessWidget {
     final repo = CategoryRepository();
     return AdminShell(
       title: 'Categories',
-      child: StreamBuilder(
+      child: StreamBuilder<List<CategoryModel>>(
         stream: repo.watchAll(),
         builder: (context, snap) {
           final items = snap.data ?? [];
-          return _AdminList(
+          return _AdminList<CategoryModel>(
+            items: items,
+            searchHint: 'Search categories by name, slug...',
+            filter: (c, q) =>
+                c.name.toLowerCase().contains(q) ||
+                c.slug.toLowerCase().contains(q) ||
+                c.shortDescription.toLowerCase().contains(q),
             createLabel: 'New category',
             onCreate: () => _categoryForm(context, repo),
             emptyTitle: 'No categories',
             emptyMessage: 'Create a category, then open it to add services.',
-            children: items
-                .map(
-                  (c) => ListTile(
-                    onTap: () => Get.toNamed(AppRoutes.adminCategory(c.id)),
-                    leading: CloudinaryImage(url: c.imageUrl, width: 48, height: 48),
-                    title: Text(c.name),
-                    subtitle: Text(
-                      '${c.active ? 'Active' : 'Inactive'} · ${c.shortDescription.isNotEmpty ? c.shortDescription : 'tap to open services'}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: _AdminActions(
-                      active: c.active,
-                      onActiveChanged: (v) => _setActive(() => repo.setActive(c.id, v)),
-                      onEdit: () => _categoryForm(context, repo, existing: c),
-                      onDelete: () => _confirmDelete(context, () => repo.delete(c.id)),
-                    ),
-                  ),
-                )
-                .toList(),
+            itemBuilder: (c) => ListTile(
+              onTap: () => Get.toNamed(AppRoutes.adminCategory(c.id)),
+              leading: CloudinaryImage(url: c.imageUrl, width: 48, height: 48),
+              title: Text(c.name),
+              subtitle: Text(
+                '${c.active ? 'Active' : 'Inactive'} · ${c.shortDescription.isNotEmpty ? c.shortDescription : 'tap to open services'}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: _AdminActions(
+                active: c.active,
+                onActiveChanged: (v) => _setActive(() => repo.setActive(c.id, v)),
+                onEdit: () => _categoryForm(context, repo, existing: c),
+                onDelete: () => _confirmDelete(context, () => repo.delete(c.id)),
+              ),
+            ),
           );
         },
       ),
@@ -154,30 +156,33 @@ class AdminCategoryServicesPage extends StatelessWidget {
             stream: serviceRepo.watchByCategory(categoryId),
             builder: (context, snap) {
               final items = snap.data ?? [];
-              return _AdminList(
+              return _AdminList<ServiceModel>(
+                items: items,
+                searchHint: 'Search services in this category...',
+                filter: (s, q) =>
+                    s.name.toLowerCase().contains(q) ||
+                    s.shortDescription.toLowerCase().contains(q) ||
+                    s.sellingPrice.toString().contains(q) ||
+                    s.mrp.toString().contains(q),
                 createLabel: 'New service',
                 onCreate: () => _serviceForm(context, lockedCategoryId: categoryId),
                 emptyTitle: 'No services in this category',
                 emptyMessage: 'Add services here. They belong directly to this category.',
-                children: items
-                    .map(
-                      (s) => ListTile(
-                        leading: CloudinaryImage(url: s.imageUrl, width: 48, height: 48),
-                        title: Text(s.name),
-                        subtitle: Text('${PriceUtils.format(s.sellingPrice)} · ${s.active ? 'Active' : 'Inactive'}'),
-                        trailing: _AdminActions(
-                          active: s.active,
-                          onActiveChanged: (v) => _setActive(() => serviceRepo.setActive(s.id, v)),
-                          onEdit: () => _serviceForm(
-                            context,
-                            existing: s,
-                            lockedCategoryId: categoryId,
-                          ),
-                          onDelete: () => _confirmDelete(context, () => serviceRepo.delete(s.id)),
-                        ),
-                      ),
-                    )
-                    .toList(),
+                itemBuilder: (s) => ListTile(
+                  leading: CloudinaryImage(url: s.imageUrl, width: 48, height: 48),
+                  title: Text(s.name),
+                  subtitle: Text('${PriceUtils.format(s.sellingPrice)} · ${s.active ? 'Active' : 'Inactive'}'),
+                  trailing: _AdminActions(
+                    active: s.active,
+                    onActiveChanged: (v) => _setActive(() => serviceRepo.setActive(s.id, v)),
+                    onEdit: () => _serviceForm(
+                      context,
+                      existing: s,
+                      lockedCategoryId: categoryId,
+                    ),
+                    onDelete: () => _confirmDelete(context, () => serviceRepo.delete(s.id)),
+                  ),
+                ),
               );
             },
           ),
@@ -194,37 +199,41 @@ class AdminServicesPage extends StatelessWidget {
     final repo = ServiceRepository();
     return AdminShell(
       title: 'Services',
-      child: StreamBuilder(
+      child: StreamBuilder<List<CategoryModel>>(
         stream: CategoryRepository().watchAll(),
         builder: (context, catSnap) {
-          return StreamBuilder(
+          return StreamBuilder<List<ServiceModel>>(
             stream: repo.watchAll(),
             builder: (context, snap) {
               final items = snap.data ?? [];
               final cats = {for (final c in catSnap.data ?? <CategoryModel>[]) c.id: c.name};
-              return _AdminList(
+              return _AdminList<ServiceModel>(
+                items: items,
+                searchHint: 'Search all services by name, category, price...',
+                filter: (s, q) =>
+                    s.name.toLowerCase().contains(q) ||
+                    s.shortDescription.toLowerCase().contains(q) ||
+                    (cats[s.categoryId]?.toLowerCase().contains(q) ?? false) ||
+                    s.sellingPrice.toString().contains(q) ||
+                    s.mrp.toString().contains(q),
                 createLabel: 'New service',
                 onCreate: () => _serviceForm(context),
                 emptyTitle: 'No services',
                 emptyMessage: 'Open a category and add services inside it.',
-                children: items
-                    .map(
-                      (s) => ListTile(
-                        onTap: s.categoryId.isEmpty ? null : () => Get.toNamed(AppRoutes.adminCategory(s.categoryId)),
-                        leading: CloudinaryImage(url: s.imageUrl, width: 48, height: 48),
-                        title: Text(s.name),
-                        subtitle: Text(
-                          '${cats[s.categoryId] ?? 'No category'} · ${PriceUtils.format(s.sellingPrice)} · ${s.active ? 'Active' : 'Inactive'}',
-                        ),
-                        trailing: _AdminActions(
-                          active: s.active,
-                          onActiveChanged: (v) => _setActive(() => repo.setActive(s.id, v)),
-                          onEdit: () => _serviceForm(context, existing: s),
-                          onDelete: () => _confirmDelete(context, () => repo.delete(s.id)),
-                        ),
-                      ),
-                    )
-                    .toList(),
+                itemBuilder: (s) => ListTile(
+                  onTap: s.categoryId.isEmpty ? null : () => Get.toNamed(AppRoutes.adminCategory(s.categoryId)),
+                  leading: CloudinaryImage(url: s.imageUrl, width: 48, height: 48),
+                  title: Text(s.name),
+                  subtitle: Text(
+                    '${cats[s.categoryId] ?? 'No category'} · ${PriceUtils.format(s.sellingPrice)} · ${s.active ? 'Active' : 'Inactive'}',
+                  ),
+                  trailing: _AdminActions(
+                    active: s.active,
+                    onActiveChanged: (v) => _setActive(() => repo.setActive(s.id, v)),
+                    onEdit: () => _serviceForm(context, existing: s),
+                    onDelete: () => _confirmDelete(context, () => repo.delete(s.id)),
+                  ),
+                ),
               );
             },
           );
@@ -241,27 +250,32 @@ class AdminPackagesPage extends StatelessWidget {
     final repo = PackageRepository();
     return AdminShell(
       title: 'Packages',
-      child: StreamBuilder(
+      child: StreamBuilder<List<PackageModel>>(
         stream: repo.watchAll(),
         builder: (context, snap) {
           final items = snap.data ?? [];
-          return _AdminList(
+          return _AdminList<PackageModel>(
+            items: items,
+            searchHint: 'Search packages by name, price...',
+            filter: (p, q) =>
+                p.name.toLowerCase().contains(q) ||
+                p.description.toLowerCase().contains(q) ||
+                p.sellingPrice.toString().contains(q),
+            createLabel: 'New package',
             onCreate: () => _packageForm(context),
-            children: items
-                .map(
-                  (p) => ListTile(
-                    leading: CloudinaryImage(url: p.imageUrl, width: 48, height: 48),
-                    title: Text(p.name),
-                    subtitle: Text('${PriceUtils.format(p.sellingPrice)} · ${p.active ? 'Active' : 'Inactive'}'),
-                    trailing: _AdminActions(
-                      active: p.active,
-                      onActiveChanged: (v) => _setActive(() => repo.setActive(p.id, v)),
-                      onEdit: () => _packageForm(context, existing: p),
-                      onDelete: () => _confirmDelete(context, () => repo.delete(p.id)),
-                    ),
-                  ),
-                )
-                .toList(),
+            emptyTitle: 'No packages',
+            emptyMessage: 'Create package bundles for your customers.',
+            itemBuilder: (p) => ListTile(
+              leading: CloudinaryImage(url: p.imageUrl, width: 48, height: 48),
+              title: Text(p.name),
+              subtitle: Text('${PriceUtils.format(p.sellingPrice)} · ${p.active ? 'Active' : 'Inactive'}'),
+              trailing: _AdminActions(
+                active: p.active,
+                onActiveChanged: (v) => _setActive(() => repo.setActive(p.id, v)),
+                onEdit: () => _packageForm(context, existing: p),
+                onDelete: () => _confirmDelete(context, () => repo.delete(p.id)),
+              ),
+            ),
           );
         },
       ),
@@ -269,30 +283,104 @@ class AdminPackagesPage extends StatelessWidget {
   }
 }
 
-class AdminPricingPage extends StatelessWidget {
+class AdminPricingPage extends StatefulWidget {
   const AdminPricingPage({super.key});
+  @override
+  State<AdminPricingPage> createState() => _AdminPricingPageState();
+}
+
+class _AdminPricingPageState extends State<AdminPricingPage> {
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AdminShell(
       title: 'Pricing',
-      child: StreamBuilder(
+      child: StreamBuilder<List<ServiceModel>>(
         stream: ServiceRepository().watchAll(),
         builder: (context, snap) {
-          final items = snap.data ?? [];
-          return ListView(
-            padding: const EdgeInsets.all(20),
-            children: items
-                .map(
-                  (s) => ListTile(
-                    title: Text(s.name),
-                    subtitle: Text('MRP ${PriceUtils.format(s.mrp)} · Selling ${PriceUtils.format(s.sellingPrice)}'),
-                    trailing: TextButton(
-                      onPressed: () => _priceForm(context, s),
-                      child: const Text('Edit'),
+          final allItems = snap.data ?? [];
+          final items = _query.isEmpty
+              ? allItems
+              : allItems
+                  .where((s) =>
+                      s.name.toLowerCase().contains(_query) ||
+                      s.sellingPrice.toString().contains(_query) ||
+                      s.mrp.toString().contains(_query))
+                  .toList();
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: TextField(
+                    controller: _search,
+                    onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
+                    decoration: InputDecoration(
+                      hintText: 'Search service pricing by name or price...',
+                      hintStyle: const TextStyle(fontSize: 13, color: AppColors.textHint),
+                      prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.textHint),
+                      suffixIcon: _query.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18, color: AppColors.textHint),
+                              onPressed: () {
+                                _search.clear();
+                                setState(() => _query = '');
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     ),
                   ),
-                )
-                .toList(),
+                ),
+              ),
+              if (_query.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Found ${items.length} of ${allItems.length} services',
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              const Divider(height: 1),
+              Expanded(
+                child: items.isEmpty
+                    ? const EmptyState(title: 'No services found', message: 'Try a different search term.')
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: items.length,
+                        separatorBuilder: (context, index) => const Divider(height: 1, indent: 20),
+                        itemBuilder: (_, i) {
+                          final s = items[i];
+                          return ListTile(
+                            title: Text(s.name),
+                            subtitle: Text('MRP ${PriceUtils.format(s.mrp)} · Selling ${PriceUtils.format(s.sellingPrice)}'),
+                            trailing: TextButton(
+                              onPressed: () => _priceForm(context, s),
+                              child: const Text('Edit'),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
           );
         },
       ),
@@ -307,26 +395,31 @@ class AdminOffersPage extends StatelessWidget {
     final repo = OfferRepository();
     return AdminShell(
       title: 'Offers',
-      child: StreamBuilder(
+      child: StreamBuilder<List<OfferModel>>(
         stream: repo.watchAll(),
         builder: (context, snap) {
           final items = snap.data ?? [];
-          return _AdminList(
+          return _AdminList<OfferModel>(
+            items: items,
+            searchHint: 'Search offers by title, code...',
+            filter: (o, q) =>
+                o.title.toLowerCase().contains(q) ||
+                o.description.toLowerCase().contains(q) ||
+                o.discountType.toLowerCase().contains(q),
+            createLabel: 'New offer',
             onCreate: () => _offerForm(context),
-            children: items
-                .map(
-                  (o) => ListTile(
-                    title: Text(o.title),
-                    subtitle: Text('${o.statusLabel} · ${o.active ? 'Active' : 'Inactive'}'),
-                    trailing: _AdminActions(
-                      active: o.active,
-                      onActiveChanged: (v) => _setActive(() => repo.setActive(o.id, v)),
-                      onEdit: () => _offerForm(context, existing: o),
-                      onDelete: () => _confirmDelete(context, () => repo.delete(o.id)),
-                    ),
-                  ),
-                )
-                .toList(),
+            emptyTitle: 'No offers',
+            emptyMessage: 'Create offers to run promotions.',
+            itemBuilder: (o) => ListTile(
+              title: Text(o.title),
+              subtitle: Text('${o.statusLabel} · ${o.active ? 'Active' : 'Inactive'}'),
+              trailing: _AdminActions(
+                active: o.active,
+                onActiveChanged: (v) => _setActive(() => repo.setActive(o.id, v)),
+                onEdit: () => _offerForm(context, existing: o),
+                onDelete: () => _confirmDelete(context, () => repo.delete(o.id)),
+              ),
+            ),
           );
         },
       ),
@@ -334,36 +427,140 @@ class AdminOffersPage extends StatelessWidget {
   }
 }
 
-class _AdminList extends StatelessWidget {
-  final List<Widget> children;
+class _AdminList<T> extends StatefulWidget {
+  final List<T>? items;
+  final Widget Function(T item)? itemBuilder;
+  final bool Function(T item, String query)? filter;
+  final List<Widget>? children;
   final VoidCallback onCreate;
   final String createLabel;
+  final String searchHint;
   final String emptyTitle;
   final String emptyMessage;
+
   const _AdminList({
-    required this.children,
+    super.key,
+    this.items,
+    this.itemBuilder,
+    this.filter,
+    this.children,
     required this.onCreate,
     this.createLabel = 'Create',
+    this.searchHint = 'Search...',
     this.emptyTitle = 'Nothing here yet',
     this.emptyMessage = 'Use Create to add the first item.',
   });
+
+  @override
+  State<_AdminList<T>> createState() => _AdminListState<T>();
+}
+
+class _AdminListState<T> extends State<_AdminList<T>> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasItems = widget.items != null && widget.itemBuilder != null;
+    final filteredItems = hasItems
+        ? (_query.isEmpty
+            ? widget.items!
+            : widget.items!.where((item) => widget.filter?.call(item, _query) ?? true).toList())
+        : <T>[];
+
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
     return Column(
       children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: PrimaryButton(label: createLabel, onTap: onCreate),
-          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: isMobile
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildSearchBar(),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: PrimaryButton(label: widget.createLabel, onTap: widget.onCreate),
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(child: _buildSearchBar()),
+                    const SizedBox(width: 16),
+                    PrimaryButton(label: widget.createLabel, onTap: widget.onCreate),
+                  ],
+                ),
         ),
+        if (hasItems && _query.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Found ${filteredItems.length} of ${widget.items!.length} items',
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        const Divider(height: 1),
         Expanded(
-          child: children.isEmpty
-              ? EmptyState(title: emptyTitle, message: emptyMessage)
-              : ListView(children: children),
+          child: hasItems
+              ? (filteredItems.isEmpty
+                  ? EmptyState(
+                      title: _query.isNotEmpty ? 'No matches found' : widget.emptyTitle,
+                      message: _query.isNotEmpty ? 'Try a different search keyword.' : widget.emptyMessage,
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: filteredItems.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1, indent: 72),
+                      itemBuilder: (_, i) => widget.itemBuilder!(filteredItems[i]),
+                    ))
+              : ((widget.children ?? []).isEmpty
+                  ? EmptyState(title: widget.emptyTitle, message: widget.emptyMessage)
+                  : ListView(children: widget.children!)),
         ),
       ],
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
+        decoration: InputDecoration(
+          hintText: widget.searchHint,
+          hintStyle: const TextStyle(fontSize: 13, color: AppColors.textHint),
+          prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.textHint),
+          suffixIcon: _query.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18, color: AppColors.textHint),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _query = '');
+                  },
+                )
+              : null,
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        ),
+      ),
     );
   }
 }
@@ -582,10 +779,14 @@ Future<void> _serviceForm(
                   TextField(controller: duration, decoration: const InputDecoration(labelText: 'Duration (minutes)')),
                   ImageUploader(
                     url: imageUrl,
-                    onUploaded: (a) {
+                    onUploaded: (a) => setLocal(() {
                       imageUrl = a.url;
                       publicId = a.publicId;
-                    },
+                    }),
+                    onCleared: () => setLocal(() {
+                      imageUrl = '';
+                      publicId = '';
+                    }),
                   ),
                   SwitchListTile(title: const Text('Show on website (Active)'), value: active, onChanged: (v) => setLocal(() => active = v)),
                   SwitchListTile(title: const Text('Popular'), value: popular, onChanged: (v) => setLocal(() => popular = v)),
@@ -660,7 +861,11 @@ Future<void> _packageForm(BuildContext context, {PackageModel? existing}) async 
                 children: [
                   TextField(controller: name, decoration: const InputDecoration(labelText: 'Package name')),
                   TextField(controller: desc, decoration: const InputDecoration(labelText: 'Description')),
-                  ImageUploader(url: imageUrl, onUploaded: (a) => setLocal(() => imageUrl = a.url)),
+                  ImageUploader(
+                    url: imageUrl,
+                    onUploaded: (a) => setLocal(() => imageUrl = a.url),
+                    onCleared: () => setLocal(() => imageUrl = ''),
+                  ),
                   Text('Auto MRP: ${PriceUtils.format(mrp)}'),
                   TextField(controller: price, decoration: const InputDecoration(labelText: 'Package price')),
                   SwitchListTile(title: const Text('Show on website (Active)'), value: active, onChanged: (v) => setLocal(() => active = v)),
@@ -775,7 +980,11 @@ Future<void> _offerForm(BuildContext context, {OfferModel? existing}) async {
                   onChanged: (v) => setLocal(() => type = v ?? 'percentage'),
                 ),
                 TextField(controller: value, decoration: const InputDecoration(labelText: 'Value')),
-                ImageUploader(url: imageUrl, onUploaded: (a) => setLocal(() => imageUrl = a.url)),
+                ImageUploader(
+                  url: imageUrl,
+                  onUploaded: (a) => setLocal(() => imageUrl = a.url),
+                  onCleared: () => setLocal(() => imageUrl = ''),
+                ),
                 SwitchListTile(
                   title: const Text('Show on website (Active)'),
                   value: active,
