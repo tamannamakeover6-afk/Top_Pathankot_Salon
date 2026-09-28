@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tamanna/core/constants/service_defaults.dart';
 import 'package:tamanna/core/utils/date_parser.dart';
 import 'package:tamanna/core/utils/price_utils.dart';
 import 'package:tamanna/core/utils/slug_utils.dart';
@@ -10,6 +11,8 @@ class ServiceModel {
   final String categoryId;
   final String shortDescription;
   final String description;
+  final String rawDescription;
+  final String rawShortDescription;
   final String imageUrl;
   final String imagePublicId;
   final List<String> gallery;
@@ -34,6 +37,8 @@ class ServiceModel {
     required this.categoryId,
     this.shortDescription = '',
     this.description = '',
+    this.rawDescription = '',
+    this.rawShortDescription = '',
     this.imageUrl = '',
     this.imagePublicId = '',
     this.gallery = const [],
@@ -59,13 +64,27 @@ class ServiceModel {
   factory ServiceModel.fromMap(Map<String, dynamic> map, {String? id}) {
     final mrp = PriceUtils.toDouble(map['mrp']);
     final selling = PriceUtils.toDouble(map['sellingPrice']);
+    final name = map['name']?.toString() ?? '';
+    final categoryId = map['categoryId']?.toString() ?? '';
+    final rawShort = map['shortDescription']?.toString() ?? '';
+    final rawDesc = map['description']?.toString() ?? '';
+
+    final shortDesc = rawShort.trim().isNotEmpty
+        ? rawShort.trim()
+        : ServiceDefaults.getShortDescription(name: name, categoryId: categoryId);
+    final desc = rawDesc.trim().isNotEmpty
+        ? rawDesc.trim()
+        : ServiceDefaults.getDescription(name: name, categoryId: categoryId);
+
     return ServiceModel(
       id: id ?? map['id']?.toString() ?? '',
-      name: map['name']?.toString() ?? '',
-      slug: map['slug']?.toString() ?? SlugUtils.from(map['name']?.toString() ?? ''),
-      categoryId: map['categoryId']?.toString() ?? '',
-      shortDescription: map['shortDescription']?.toString() ?? '',
-      description: map['description']?.toString() ?? '',
+      name: name,
+      slug: map['slug']?.toString() ?? SlugUtils.from(name),
+      categoryId: categoryId,
+      rawDescription: rawDesc,
+      rawShortDescription: rawShort,
+      shortDescription: shortDesc,
+      description: desc,
       imageUrl: map['imageUrl']?.toString() ?? '',
       imagePublicId: map['imagePublicId']?.toString() ?? '',
       gallery: List<String>.from(map['gallery'] ?? const []),

@@ -12,11 +12,13 @@ import 'package:tamanna/data/models/offer_model.dart';
 import 'package:tamanna/data/models/package_model.dart';
 import 'package:tamanna/data/models/service_model.dart';
 import 'package:tamanna/data/services/cloudinary_service.dart';
+import 'package:tamanna/features/catalog/catalog_controller.dart';
 import 'package:tamanna/features/request/request_controller.dart';
 
 class CategoryCard extends StatefulWidget {
   final CategoryModel category;
-  const CategoryCard({super.key, required this.category});
+  final int? serviceCount;
+  const CategoryCard({super.key, required this.category, this.serviceCount});
 
   @override
   State<CategoryCard> createState() => _CategoryCardState();
@@ -30,53 +32,85 @@ class _CategoryCardState extends State<CategoryCard> {
     final isMobile = Breakpoints.isMobile(context);
     final imgHeight = isMobile ? 95.0 : 160.0;
     final radius = isMobile ? 10.0 : 18.0;
-    return MouseRegion(
-      onEnter: (_) => setState(() => hover = true),
-      onExit: (_) => setState(() => hover = false),
-      child: GestureDetector(
-        onTap: () => Get.toNamed('/categories/${c.slug}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image box with rounded corners and subtle hover lift
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              transform: Matrix4.translationValues(0, hover ? -4 : 0, 0),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(radius),
-                boxShadow: hover ? AppShadows.hover : AppShadows.soft,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(radius),
-                child: CloudinaryImage(
-                  url: c.imageUrl,
-                  height: imgHeight,
-                  width: double.infinity,
-                  radius: BorderRadius.circular(radius),
+    return Tooltip(
+      message: c.shortDescription.isNotEmpty ? c.shortDescription : c.name,
+      waitDuration: const Duration(milliseconds: 600),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => hover = true),
+        onExit: (_) => setState(() => hover = false),
+        child: GestureDetector(
+          onTap: () => Get.toNamed('/categories/${c.slug}'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image box with rounded corners and subtle hover lift
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                transform: Matrix4.translationValues(0, hover ? -4 : 0, 0),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(radius),
+                  boxShadow: hover ? AppShadows.hover : AppShadows.soft,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(radius),
+                  child: CloudinaryImage(
+                    url: c.imageUrl,
+                    height: imgHeight,
+                    width: double.infinity,
+                    radius: BorderRadius.circular(radius),
+                  ),
                 ),
               ),
-            ),
-            // Details outside the box
-            SizedBox(height: isMobile ? 5 : 10),
-            Text(
-              c.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.title.copyWith(
-                fontSize: isMobile ? 12.5 : 15,
-                fontWeight: FontWeight.w600,
+              // Details outside the box
+              SizedBox(height: isMobile ? 5 : 10),
+              Text(
+                c.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.title.copyWith(
+                  fontSize: isMobile ? 12.5 : 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 1),
-            Text(
-              c.serviceCount > 0 ? '${c.serviceCount} services' : 'Explore',
-              style: AppTextStyles.small.copyWith(
-                fontSize: isMobile ? 10.5 : 12,
-                color: AppColors.textSecondary,
+              const SizedBox(height: 1),
+              Builder(
+                builder: (context) {
+                  if (widget.serviceCount != null) {
+                    final count = widget.serviceCount!;
+                    return Text(
+                      count > 0 ? '$count ${count == 1 ? 'service' : 'services'}' : 'Explore',
+                      style: AppTextStyles.small.copyWith(
+                        fontSize: isMobile ? 10.5 : 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    );
+                  }
+                  if (Get.isRegistered<CatalogController>()) {
+                    final catalog = Get.find<CatalogController>();
+                    return Obx(() {
+                      final count = catalog.serviceCountFor(c);
+                      return Text(
+                        count > 0 ? '$count ${count == 1 ? 'service' : 'services'}' : 'Explore',
+                        style: AppTextStyles.small.copyWith(
+                          fontSize: isMobile ? 10.5 : 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      );
+                    });
+                  }
+                  final count = c.serviceCount;
+                  return Text(
+                    count > 0 ? '$count ${count == 1 ? 'service' : 'services'}' : 'Explore',
+                    style: AppTextStyles.small.copyWith(
+                      fontSize: isMobile ? 10.5 : 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  );
+                },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -173,7 +207,7 @@ class _ServiceCardState extends State<ServiceCard> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        s.shortDescription.isNotEmpty ? s.shortDescription : s.description,
+                        s.description.isNotEmpty ? s.description : s.shortDescription,
                         style: AppTextStyles.body,
                       ),
                       if (s.includedItems.isNotEmpty) ...[

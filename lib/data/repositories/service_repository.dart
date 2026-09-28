@@ -135,12 +135,12 @@ class ServiceRepository {
     String sort = 'price_asc',
     int limit = 100,
   }) {
-    Query<Map<String, dynamic>> query = _col.where('active', isEqualTo: true);
+    Query<Map<String, dynamic>> query = _col;
     if (categoryId != null && categoryId.isNotEmpty) {
       query = query.where('categoryId', isEqualTo: categoryId);
     }
     return query.snapshots().map((s) {
-      var items = s.docs.map(ServiceModel.fromDoc).toList();
+      var items = s.docs.map(ServiceModel.fromDoc).where((e) => e.active).toList();
       items = _sortLocal(items, sort);
       if (items.length > limit) {
         items = items.sublist(0, limit);
@@ -150,7 +150,7 @@ class ServiceRepository {
   }
 
   Stream<List<ServiceModel>> watchByCategory(String categoryId, {String sort = 'price_asc'}) {
-    return _col.where('categoryId', isEqualTo: categoryId).where('active', isEqualTo: true).snapshots().map((s) {
+    return _col.where('categoryId', isEqualTo: categoryId).snapshots().map((s) {
       final items = s.docs.map(ServiceModel.fromDoc).toList();
       return _sortLocal(items, sort);
     });

@@ -205,7 +205,7 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
         ),
         SizedBox(height: isMobile ? 10 : 16),
         Text(
-          s.shortDescription,
+          s.shortDescription.isNotEmpty ? s.shortDescription : s.description,
           style: TextStyle(
             fontSize: isMobile ? 13 : 14,
             color: AppColors.textSecondary,
@@ -317,8 +317,10 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(s.description, style: TextStyle(fontSize: isMobile ? 13 : 14, color: AppColors.textSecondary, height: 1.4)),
+                        Text(
+                          s.description.isNotEmpty ? s.description : s.shortDescription,
+                          style: TextStyle(fontSize: isMobile ? 13 : 14, color: AppColors.textSecondary, height: 1.4),
+                        ),
                         SizedBox(height: isMobile ? 16 : 24),
                         if (s.benefits.isNotEmpty) ...[
                           Text(

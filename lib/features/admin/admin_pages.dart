@@ -115,7 +115,11 @@ class AdminCategoriesPage extends StatelessWidget {
                     onTap: () => Get.toNamed(AppRoutes.adminCategory(c.id)),
                     leading: CloudinaryImage(url: c.imageUrl, width: 48, height: 48),
                     title: Text(c.name),
-                    subtitle: Text('${c.active ? 'Active' : 'Inactive'} · tap to open services'),
+                    subtitle: Text(
+                      '${c.active ? 'Active' : 'Inactive'} · ${c.shortDescription.isNotEmpty ? c.shortDescription : 'tap to open services'}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     trailing: _AdminActions(
                       active: c.active,
                       onActiveChanged: (v) => _setActive(() => repo.setActive(c.id, v)),
@@ -139,14 +143,14 @@ class AdminCategoryServicesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final categoryId = Get.parameters['categoryId'] ?? '';
     final serviceRepo = ServiceRepository();
-    return FutureBuilder(
-      future: CategoryRepository().byId(categoryId),
+    return StreamBuilder<CategoryModel?>(
+      stream: CategoryRepository().watchById(categoryId),
       builder: (context, catSnap) {
         final cat = catSnap.data;
         return AdminShell(
           title: cat?.name ?? 'Services',
           onBack: () => Get.offNamed(AppRoutes.adminCategories),
-          child: StreamBuilder(
+          child: StreamBuilder<List<ServiceModel>>(
             stream: serviceRepo.watchByCategory(categoryId),
             builder: (context, snap) {
               final items = snap.data ?? [];
@@ -443,6 +447,7 @@ Future<void> _confirmDelete(BuildContext context, Future<void> Function() action
 
 Future<void> _categoryForm(BuildContext context, CategoryRepository repo, {CategoryModel? existing}) async {
   final name = TextEditingController(text: existing?.name ?? '');
+  final short = TextEditingController(text: existing?.shortDescription ?? '');
   final desc = TextEditingController(text: existing?.description ?? '');
   var imageUrl = existing?.imageUrl ?? '';
   var publicId = existing?.imagePublicId ?? '';
@@ -457,7 +462,22 @@ Future<void> _categoryForm(BuildContext context, CategoryRepository repo, {Categ
             children: [
               TextField(controller: name, decoration: const InputDecoration(labelText: 'Name')),
               const SizedBox(height: 8),
-              TextField(controller: desc, decoration: const InputDecoration(labelText: 'Description')),
+              TextField(
+                controller: short,
+                decoration: const InputDecoration(
+                  labelText: 'Short description (Optional)',
+                  hintText: 'Leave empty to use automatic default',
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: desc,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Description (Optional)',
+                  hintText: 'Leave empty to use automatic default',
+                ),
+              ),
               const SizedBox(height: 8),
               StatefulBuilder(
                 builder: (context, setLocal) => Column(
@@ -491,6 +511,7 @@ Future<void> _categoryForm(BuildContext context, CategoryRepository repo, {Categ
                 id: existing?.id ?? '',
                 name: name.text.trim(),
                 slug: SlugUtils.from(name.text),
+                shortDescription: short.text.trim(),
                 description: desc.text.trim(),
                 imageUrl: imageUrl,
                 imagePublicId: publicId,

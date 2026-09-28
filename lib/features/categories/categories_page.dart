@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tamanna/core/responsive/breakpoints.dart';
@@ -5,6 +6,8 @@ import 'package:tamanna/core/theme/app_colors.dart';
 import 'package:tamanna/core/theme/app_text_styles.dart';
 import 'package:tamanna/core/widgets/cards.dart';
 import 'package:tamanna/core/widgets/ui_kit.dart';
+import 'package:tamanna/data/models/category_model.dart';
+import 'package:tamanna/data/repositories/category_repository.dart';
 import 'package:tamanna/features/catalog/catalog_controller.dart';
 import 'package:tamanna/features/shell/site_shell.dart';
 
@@ -19,43 +22,52 @@ class CategoriesPage extends StatelessWidget {
       child: ResponsiveContainer(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 36),
-          child: Obx(() {
-            final cats = catalog.categories;
-            if (cats.isEmpty) {
-              return const EmptyState(
-                title: 'No categories yet',
-                message: 'The catalog will appear once published.',
-              );
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'All categories',
-                  style: isMobile
-                      ? AppTextStyles.h2.copyWith(fontSize: 22)
-                      : AppTextStyles.h1,
-                ),
-                const SizedBox(height: 6),
-                Text('Open a category to see its services.',
-                    style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary)),
-                SizedBox(height: isMobile ? 16 : 28),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: cats.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: Breakpoints.gridCount(context),
-                    mainAxisSpacing: isMobile ? 10 : 20,
-                    crossAxisSpacing: isMobile ? 10 : 20,
-                    mainAxisExtent: isMobile ? 145 : 225,
+          child: StreamBuilder<List<CategoryModel>>(
+            stream: CategoryRepository().watchActive(),
+            builder: (context, snap) {
+              final cats = snap.data ?? catalog.categories;
+              if (snap.connectionState == ConnectionState.waiting && cats.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(40),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (cats.isEmpty) {
+                return const EmptyState(
+                  title: 'No categories yet',
+                  message: 'The catalog will appear once published.',
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'All categories',
+                    style: isMobile
+                        ? AppTextStyles.h2.copyWith(fontSize: 22)
+                        : AppTextStyles.h1,
                   ),
-                  itemBuilder: (_, i) => CategoryCard(category: cats[i]),
-                ),
-                SizedBox(height: isMobile ? 24 : 40),
-              ],
-            );
-          }),
+                  const SizedBox(height: 6),
+                  Text('Open a category to see its services.',
+                      style: TextStyle(fontSize: isMobile ? 13 : 15, color: AppColors.textSecondary)),
+                  SizedBox(height: isMobile ? 16 : 28),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: cats.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: Breakpoints.gridCount(context),
+                      mainAxisSpacing: isMobile ? 10 : 20,
+                      crossAxisSpacing: isMobile ? 10 : 20,
+                      mainAxisExtent: isMobile ? 145 : 225,
+                    ),
+                    itemBuilder: (_, i) => CategoryCard(category: cats[i]),
+                  ),
+                  SizedBox(height: isMobile ? 24 : 40),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -71,29 +83,47 @@ class CategoryDetailPage extends StatefulWidget {
 class _CategoryDetailPageState extends State<CategoryDetailPage> {
   final catalog = Get.find<CatalogController>();
   final search = TextEditingController();
+  StreamSubscription<CategoryModel?>? _catSub;
 
   @override
   void initState() {
     super.initState();
     catalog.searchQuery.value = '';
-    WidgetsBinding.instance.addPostFrameCallback((_) => _boot());
+    _listenCategory();
   }
 
-  @override
-  void dispose() {
-    search.dispose();
-    super.dispose();
+  void _listenCategory() {
+    final slug = Get.parameters['categorySlug'] ?? '';
+    _catSub?.cancel();
+    _catSub = CategoryRepository().watchBySlug(slug).listen((cat) {
+      if (cat != null) {
+        if (catalog.selectedCategoryId != cat.id || catalog.categoryServices.isEmpty) {
+          catalog.loadListing(categoryId: cat.id);
+        }
+      }
+    });
+    _boot();
   }
 
   Future<void> _boot() async {
     final slug = Get.parameters['categorySlug'] ?? '';
     var resolved = catalog.categoryBySlug(slug);
     if (resolved == null) {
-      await catalog.loadHome();
-      resolved = catalog.categoryBySlug(slug);
+      resolved = await CategoryRepository().bySlug(slug);
+      if (resolved != null && !catalog.categories.any((c) => c.id == resolved!.id)) {
+        catalog.categories.add(resolved);
+      }
     }
-    if (resolved == null) return;
-    await catalog.loadListing(categoryId: resolved.id);
+    if (resolved != null) {
+      catalog.loadListing(categoryId: resolved.id);
+    }
+  }
+
+  @override
+  void dispose() {
+    _catSub?.cancel();
+    search.dispose();
+    super.dispose();
   }
 
   int _columns(BuildContext context) {
@@ -108,97 +138,91 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
   Widget build(BuildContext context) {
     final slug = Get.parameters['categorySlug'] ?? '';
     return SiteShell(
-      child: Obx(() {
-        final cat = catalog.categoryBySlug(slug);
-        if (cat == null) {
-          return const Padding(
-            padding: EdgeInsets.all(40),
-            child: EmptyState(title: 'Category not found', message: 'It may have been unpublished.'),
-          );
-        }
-        final items = catalog.listing;
-        final isMobile = Breakpoints.isMobile(context);
-        return ResponsiveContainer(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: isMobile ? 16 : 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
+      child: StreamBuilder<CategoryModel?>(
+        stream: CategoryRepository().watchBySlug(slug),
+        builder: (context, catSnap) {
+          final cat = catSnap.data ?? catalog.categoryBySlug(slug);
+          if (cat == null) {
+            if (catSnap.connectionState == ConnectionState.waiting) {
+              return const Padding(
+                padding: EdgeInsets.all(60),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return const Padding(
+              padding: EdgeInsets.all(40),
+              child: EmptyState(title: 'Category not found', message: 'It may have been unpublished.'),
+            );
+          }
+          final isMobile = Breakpoints.isMobile(context);
+          return Obx(() {
+            final items = catalog.listing;
+            return ResponsiveContainer(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: isMobile ? 16 : 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    InkWell(
-                      onTap: () => Get.toNamed('/'),
-                      child: Text('Home', style: AppTextStyles.caption.copyWith(color: AppColors.textHint)),
-                    ),
-                    Text('  /  ', style: AppTextStyles.caption.copyWith(color: AppColors.textHint)),
-                    InkWell(
-                      onTap: () => Get.toNamed('/categories'),
-                      child: Text('Categories', style: AppTextStyles.caption.copyWith(color: AppColors.textHint)),
-                    ),
-                    Text('  /  ', style: AppTextStyles.caption.copyWith(color: AppColors.textHint)),
                     Text(
                       cat.name,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
+                      style: AppTextStyles.h1.copyWith(
+                        fontSize: isMobile ? 22 : 26,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${items.length} ${items.length == 1 ? 'service' : 'services'}',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: isMobile ? 12.5 : 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: isMobile ? 14 : 20),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final stacked = constraints.maxWidth < 720;
+                        final searchField = TextField(
+                          controller: search,
+                          onChanged: (v) {
+                            catalog.searchQuery.value = v;
+                            catalog.applyClientFilters();
+                          },
+                          decoration: const InputDecoration(
+                            hintText: 'Search services in this category',
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                        );
+                        final sort = _SortDropdown(catalog: catalog);
+                        if (stacked) {
+                          return Column(
+                            children: [
+                              searchField,
+                              const SizedBox(height: 12),
+                              Align(alignment: Alignment.centerRight, child: sort),
+                            ],
+                          );
+                        }
+                        return Row(
+                          children: [
+                            Expanded(child: searchField),
+                            const SizedBox(width: 16),
+                            sort,
+                          ],
+                        );
+                      },
+                    ),
+                    SizedBox(height: isMobile ? 18 : 28),
+                    _ListingGrid(catalog: catalog, columns: _columns(context)),
+                    SizedBox(height: isMobile ? 24 : 48),
                   ],
                 ),
-                SizedBox(height: isMobile ? 12 : 18),
-                Text(
-                  cat.name,
-                  style: AppTextStyles.h1.copyWith(
-                    fontSize: isMobile ? 22 : 26,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text('${items.length} services',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: isMobile ? 12.5 : 14)),
-                SizedBox(height: isMobile ? 14 : 20),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final stacked = constraints.maxWidth < 720;
-                    final searchField = TextField(
-                      controller: search,
-                      onChanged: (v) {
-                        catalog.searchQuery.value = v;
-                        catalog.applyClientFilters();
-                      },
-                      decoration: const InputDecoration(
-                        hintText: 'Search services in this category',
-                        prefixIcon: Icon(Icons.search),
-                      ),
-                    );
-                    final sort = _SortDropdown(catalog: catalog);
-                    if (stacked) {
-                      return Column(
-                        children: [
-                          searchField,
-                          const SizedBox(height: 12),
-                          Align(alignment: Alignment.centerRight, child: sort),
-                        ],
-                      );
-                    }
-                    return Row(
-                      children: [
-                        Expanded(child: searchField),
-                        const SizedBox(width: 16),
-                        sort,
-                      ],
-                    );
-                  },
-                ),
-                SizedBox(height: isMobile ? 18 : 28),
-                _ListingGrid(catalog: catalog, columns: _columns(context)),
-                SizedBox(height: isMobile ? 24 : 48),
-              ],
-            ),
-          ),
-        );
-      }),
+              ),
+            );
+          });
+        },
+      ),
     );
   }
 }

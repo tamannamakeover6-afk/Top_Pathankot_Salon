@@ -21,6 +21,17 @@ class CategoryRepository {
     });
   }
 
+  Stream<CategoryModel?> watchById(String id) {
+    return _col.doc(id).snapshots().map((doc) => doc.exists ? CategoryModel.fromDoc(doc) : null);
+  }
+
+  Stream<CategoryModel?> watchBySlug(String slug) {
+    return _col.where('slug', isEqualTo: slug).limit(1).snapshots().map((s) {
+      if (s.docs.isEmpty) return null;
+      return CategoryModel.fromDoc(s.docs.first);
+    });
+  }
+
   Future<List<CategoryModel>> fetchAll() async {
     final snap = await _col.get();
     final items = snap.docs.map(CategoryModel.fromDoc).toList();

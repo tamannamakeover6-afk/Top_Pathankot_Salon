@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tamanna/core/constants/category_defaults.dart';
 import 'package:tamanna/core/utils/date_parser.dart';
 import 'package:tamanna/core/utils/slug_utils.dart';
 
@@ -6,7 +7,10 @@ class CategoryModel {
   final String id;
   final String name;
   final String slug;
+  final String shortDescription;
   final String description;
+  final String rawDescription;
+  final String rawShortDescription;
   final String imageUrl;
   final String imagePublicId;
   final int sortOrder;
@@ -19,7 +23,10 @@ class CategoryModel {
     required this.id,
     required this.name,
     required this.slug,
+    this.shortDescription = '',
     this.description = '',
+    this.rawDescription = '',
+    this.rawShortDescription = '',
     this.imageUrl = '',
     this.imagePublicId = '',
     this.sortOrder = 0,
@@ -35,11 +42,22 @@ class CategoryModel {
   }
 
   factory CategoryModel.fromMap(Map<String, dynamic> map, {String? id}) {
+    final name = map['name']?.toString() ?? '';
+    final slug = map['slug']?.toString() ?? SlugUtils.from(name);
+    final fallback = CategoryDefaults.get(slug: slug, name: name);
+    final rawDesc = map['description']?.toString() ?? '';
+    final rawShortDesc = map['shortDescription']?.toString() ?? '';
+
     return CategoryModel(
       id: id ?? map['id']?.toString() ?? '',
-      name: map['name']?.toString() ?? '',
-      slug: map['slug']?.toString() ?? SlugUtils.from(map['name']?.toString() ?? ''),
-      description: map['description']?.toString() ?? '',
+      name: name,
+      slug: slug,
+      rawDescription: rawDesc,
+      rawShortDescription: rawShortDesc,
+      shortDescription:
+          rawShortDesc.trim().isNotEmpty ? rawShortDesc.trim() : fallback.shortDescription,
+      description:
+          rawDesc.trim().isNotEmpty ? rawDesc.trim() : fallback.description,
       imageUrl: map['imageUrl']?.toString() ?? '',
       imagePublicId: map['imagePublicId']?.toString() ?? '',
       sortOrder: (map['sortOrder'] as num?)?.toInt() ?? 0,
@@ -54,7 +72,8 @@ class CategoryModel {
         'name': name,
         'slug': slug,
         'nameLower': SlugUtils.searchable(name),
-        'searchKeywords': SlugUtils.keywords('$name $description'),
+        'searchKeywords': SlugUtils.keywords('$name $description $shortDescription'),
+        'shortDescription': shortDescription,
         'description': description,
         'imageUrl': imageUrl,
         'imagePublicId': imagePublicId,
