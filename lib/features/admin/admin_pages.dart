@@ -359,15 +359,14 @@ class _AdminPricingPageState extends State<AdminPricingPage> {
                     ),
                   ),
                 ),
-              const Divider(height: 1),
+              const SizedBox(height: 8),
               Expanded(
                 child: items.isEmpty
                     ? const EmptyState(title: 'No services found', message: 'Try a different search term.')
-                    : ListView.separated(
+                    : ListView.builder(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         itemCount: items.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1, indent: 20),
-                        itemBuilder: (_, i) {
+                        itemBuilder: (context, i) {
                           final s = items[i];
                           return ListTile(
                             title: Text(s.name),
@@ -511,7 +510,7 @@ class _AdminListState<T> extends State<_AdminList<T>> {
               ),
             ),
           ),
-        const Divider(height: 1),
+        const SizedBox(height: 8),
         Expanded(
           child: hasItems
               ? (filteredItems.isEmpty
@@ -519,10 +518,9 @@ class _AdminListState<T> extends State<_AdminList<T>> {
                       title: _query.isNotEmpty ? 'No matches found' : widget.emptyTitle,
                       message: _query.isNotEmpty ? 'Try a different search keyword.' : widget.emptyMessage,
                     )
-                  : ListView.separated(
+                  : ListView.builder(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: filteredItems.length,
-                      separatorBuilder: (context, index) => const Divider(height: 1, indent: 72),
                       itemBuilder: (_, i) => widget.itemBuilder!(filteredItems[i]),
                     ))
               : ((widget.children ?? []).isEmpty
