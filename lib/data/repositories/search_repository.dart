@@ -35,7 +35,9 @@ class SearchRepository {
       _categories.fetchActive(),
     ]);
     final services = results[0] as List<ServiceModel>;
+    services.sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
     final packages = results[1] as List<PackageModel>;
+    packages.sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
     final categories = (results[2] as List<CategoryModel>)
         .where((c) => c.name.toLowerCase().contains(q.toLowerCase()))
         .take(5)

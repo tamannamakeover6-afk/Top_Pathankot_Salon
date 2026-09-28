@@ -7,11 +7,25 @@ class OfferRepository {
 
   Future<List<OfferModel>> fetchLive({int limit = 12}) async {
     final snap = await _col.where('active', isEqualTo: true).limit(limit).get();
-    return snap.docs.map(OfferModel.fromDoc).where((e) => e.isLive).toList();
+    final items = snap.docs.map(OfferModel.fromDoc).where((e) => e.isLive).toList();
+    items.sort((a, b) => a.discountValue.compareTo(b.discountValue));
+    return items;
+  }
+
+  Stream<List<OfferModel>> watchLive({int limit = 12}) {
+    return _col.where('active', isEqualTo: true).snapshots().map((s) {
+      final items = s.docs.map(OfferModel.fromDoc).where((e) => e.isLive).toList();
+      items.sort((a, b) => a.discountValue.compareTo(b.discountValue));
+      return items.take(limit).toList();
+    });
   }
 
   Stream<List<OfferModel>> watchAll() {
-    return _col.snapshots().map((s) => s.docs.map(OfferModel.fromDoc).toList());
+    return _col.snapshots().map((s) {
+      final items = s.docs.map(OfferModel.fromDoc).toList();
+      items.sort((a, b) => a.discountValue.compareTo(b.discountValue));
+      return items;
+    });
   }
 
   Future<String> save(OfferModel model) async {

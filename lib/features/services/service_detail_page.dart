@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tamanna/core/responsive/breakpoints.dart';
@@ -27,21 +28,24 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
   bool showBooking = false;
   final _bookingKey = GlobalKey();
   final _scroll = ScrollController();
+  StreamSubscription<ServiceModel?>? _serviceSub;
+  StreamSubscription<List<ServiceModel>>? _relatedSub;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _listen();
   }
 
-  Future<void> _load() async {
+  void _listen() {
     setState(() {
       loading = true;
       error = null;
     });
-    try {
-      final slug = Get.parameters['serviceSlug'] ?? '';
-      final item = await ServiceRepository().bySlug(slug);
+    final slug = Get.parameters['serviceSlug'] ?? '';
+    _serviceSub?.cancel();
+    _serviceSub = ServiceRepository().watchBySlug(slug).listen((item) {
+      if (!mounted) return;
       if (item == null) {
         setState(() {
           loading = false;
@@ -49,11 +53,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
         });
         return;
       }
-      final relatedItems = await ServiceRepository().related(categoryId: item.categoryId, excludeId: item.id);
       setState(() {
         service = item;
-        gallery = item.imageUrl;
-        related = relatedItems;
+        if (gallery.isEmpty) gallery = item.imageUrl;
         loading = false;
       });
       final request = Get.find<RequestController>();
@@ -63,16 +65,28 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
         setState(() => showBooking = true);
         WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBooking());
       }
-    } catch (e) {
+
+      // Also listen to related services sorted by price ascending
+      _relatedSub?.cancel();
+      _relatedSub = ServiceRepository()
+          .watchRelated(categoryId: item.categoryId, excludeId: item.id)
+          .listen((relatedItems) {
+        if (!mounted) return;
+        setState(() => related = relatedItems);
+      });
+    }, onError: (e) {
+      if (!mounted) return;
       setState(() {
         error = ErrorHandler.message(e);
         loading = false;
       });
-    }
+    });
   }
 
   @override
   void dispose() {
+    _serviceSub?.cancel();
+    _relatedSub?.cancel();
     _scroll.dispose();
     super.dispose();
   }
@@ -94,7 +108,7 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
       return const SiteShell(child: Padding(padding: EdgeInsets.all(48), child: SkeletonServiceCard()));
     }
     if (error != null || service == null) {
-      return SiteShell(child: ErrorState(message: error ?? 'Not found', onRetry: _load));
+      return SiteShell(child: ErrorState(message: error ?? 'Not found', onRetry: _listen));
     }
     final s = service!;
     final desktop = Breakpoints.isDesktop(context);

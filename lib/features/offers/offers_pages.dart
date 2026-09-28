@@ -6,6 +6,7 @@ import 'package:tamanna/core/theme/app_text_styles.dart';
 import 'package:tamanna/core/utils/error_handler.dart';
 import 'package:tamanna/core/widgets/cards.dart';
 import 'package:tamanna/core/widgets/ui_kit.dart';
+import 'package:tamanna/data/models/offer_model.dart';
 import 'package:tamanna/features/catalog/catalog_controller.dart';
 import 'package:tamanna/features/shell/site_shell.dart';
 
@@ -20,8 +21,8 @@ class OffersPage extends StatelessWidget {
       child: ResponsiveContainer(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 36),
-          child: FutureBuilder(
-            future: catalog.allOffers(),
+          child: StreamBuilder<List<OfferModel>>(
+            stream: catalog.watchOffers(),
             builder: (context, snap) {
               if (snap.hasError) {
                 return ErrorState(message: ErrorHandler.message(snap.error!), onRetry: () {});

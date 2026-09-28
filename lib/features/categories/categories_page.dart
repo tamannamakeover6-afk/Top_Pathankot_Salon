@@ -234,9 +234,9 @@ class _SortDropdown extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
               items: const [
-                DropdownMenuItem(value: 'newest', child: Text('Newest')),
                 DropdownMenuItem(value: 'price_asc', child: Text('Price: Low to High')),
                 DropdownMenuItem(value: 'price_desc', child: Text('Price: High to Low')),
+                DropdownMenuItem(value: 'newest', child: Text('Newest')),
               ],
               onChanged: (v) {
                 if (v != null) {

@@ -364,9 +364,15 @@ class BookingDetailPage extends StatelessWidget {
     final id = Get.parameters['id'] ?? '';
     return SiteShell(
       child: ResponsiveContainer(
-        child: FutureBuilder(
-          future: BookingRepository().byId(id),
+        child: StreamBuilder<BookingModel?>(
+          stream: BookingRepository().watchById(id),
           builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
+              return const Padding(
+                padding: EdgeInsets.all(40),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
             final b = snap.data;
             if (b == null) {
               return const Padding(

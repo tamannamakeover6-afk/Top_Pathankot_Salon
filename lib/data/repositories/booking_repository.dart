@@ -78,6 +78,18 @@ class BookingRepository {
     });
   }
 
+  Stream<BookingModel?> watchById(String id) {
+    return _col.doc(id).snapshots().map((doc) => doc.exists ? BookingModel.fromDoc(doc) : null);
+  }
+
+  Stream<List<BookingModel>> watchAll() {
+    return _col.snapshots().map((s) {
+      final items = s.docs.map(BookingModel.fromDoc).toList();
+      items.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+      return items;
+    });
+  }
+
   Future<BookingModel?> byId(String id) async {
     final doc = await _col.doc(id).get();
     if (!doc.exists) return null;

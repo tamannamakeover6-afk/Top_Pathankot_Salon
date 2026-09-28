@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tamanna/core/responsive/breakpoints.dart';
@@ -32,8 +33,8 @@ class _PackagesPageState extends State<PackagesPage> {
             final isMobile = Breakpoints.isMobile(context);
             return Padding(
               padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 36),
-              child: FutureBuilder(
-                future: catalog.allPackages(),
+              child: StreamBuilder<List<PackageModel>>(
+                stream: catalog.watchPackages(),
                 builder: (context, snap) {
                   if (snap.hasError) {
                     return ErrorState(message: ErrorHandler.message(snap.error!), onRetry: () => setState(() {}));
@@ -115,11 +116,18 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
   bool loading = true;
   bool showBooking = false;
   final _bookingKey = GlobalKey();
+  StreamSubscription<PackageModel?>? _packSub;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _listen();
+  }
+
+  @override
+  void dispose() {
+    _packSub?.cancel();
+    super.dispose();
   }
 
   void _openBooking() {
@@ -133,9 +141,11 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
     Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 350), alignment: 0.08, curve: Curves.easeOut);
   }
 
-  Future<void> _load() async {
-    try {
-      final item = await PackageRepository().bySlug(Get.parameters['packageSlug'] ?? '');
+  void _listen() {
+    final slug = Get.parameters['packageSlug'] ?? '';
+    _packSub?.cancel();
+    _packSub = PackageRepository().watchBySlug(slug).listen((item) async {
+      if (!mounted) return;
       if (item == null) {
         setState(() {
           error = 'Package not found.';
@@ -144,6 +154,7 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
         return;
       }
       final services = await ServiceRepository().byIds(item.serviceIds);
+      if (!mounted) return;
       setState(() {
         pack = item;
         included = services;
@@ -156,12 +167,14 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
         setState(() => showBooking = true);
         WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBooking());
       }
-    } catch (e) {
-      setState(() {
-        error = ErrorHandler.message(e);
-        loading = false;
-      });
-    }
+    }, onError: (e) {
+      if (mounted) {
+        setState(() {
+          error = ErrorHandler.message(e);
+          loading = false;
+        });
+      }
+    });
   }
 
   @override
@@ -180,7 +193,7 @@ class _PackageDetailPageState extends State<PackageDetailPage> {
       );
     }
     if (error != null || pack == null) {
-      return SiteShell(child: ErrorState(message: error ?? 'Not found', onRetry: _load));
+      return SiteShell(child: ErrorState(message: error ?? 'Not found', onRetry: _listen));
     }
     final p = pack!;
     return SiteShell(
